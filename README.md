@@ -1,9 +1,9 @@
 # where-is-my-money
 Study project within the front-end course from Kottans
 
-The application is designed to track income & expenses, it should help you better control expenses, plan a budget and, possibly, get insights from statistics. It should answer questions like:
+The application is designed to track income & expenses. It should help you better control expenses, plan a budget and, possibly, get insights from statistics. It should answer questions like:
 - How much money do I have now?
-- How long have I been buying Chinese sneakers that have just died?
+- How long have I bought Chinese sneakers that have just died?
 - How much money did I spend on damn cigarettes in a year?
 - If I buy that guitar there now, how hard will it be for me to live up to my paycheck?
 
