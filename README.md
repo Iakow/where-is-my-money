@@ -22,5 +22,5 @@ Main features:
 5. show the distribution of costs by category for the specified period (as a list)
 6. visualization of the mentioned distribution
 7. plan and track your budget until your next payday (some widget displays balance changes and the passage of time)
-8. user tags for transactions and custom categories
-9. the application can work offline
+8. user tags and custom categories for transactions
+10. the application can work offline
