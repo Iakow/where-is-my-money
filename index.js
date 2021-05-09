@@ -1,166 +1,290 @@
-const categories = ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'];
-
-const transactions = [];
+import { formatDate, getDateString } from './utils';
+import styles from './style.css';
+import { func } from 'prop-types';
 
 window.userDataStore = {
   categories: {
-    outcome: ['', 'Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
+    outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
     income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
   },
-  balance: 1234,
+  balance: 0,
   transactions: {
-    1619114621421: { sum: '500', date: '', category: 'Одежда', comment: '' },
+    1619114621421: {
+      sum: 500,
+      moneyWay: '',
+      date: 1619114621421,
+      category: 1,
+      comment: 'Какая-то фигня',
+    },
+    1619208263117: {
+      sum: 10000,
+      date: 1619208263117,
+      category: 0,
+      comment: '',
+    },
+    1619208282263: {
+      sum: -1000,
+      date: 1619208282263,
+      category: 0,
+      comment: 'Педали',
+    },
+    1619208293067: {
+      sum: -245,
+      date: 1619208293067,
+      category: 4,
+      comment: '',
+    },
+    1619208307065: {
+      sum: -50,
+      date: 1619208307065,
+      category: 4,
+      comment: '',
+    },
   },
-  moneyWay: 'income',
+  form: {
+    isOpened: false,
+    transactionId: null,
+    cachedBalance: 0,
+    data: null,
+  },
 };
 
-window.render = () => {
+window.renderApp = () => {
+  const { balance, transactions, form } = userDataStore;
+
   document.querySelector('#app').innerHTML = `
-    ${moneyWay()}
-    ${form()}
-    ${list()}
+    <div class=${styles['app-container']}>
+      ${Main(balance)}
+      ${form.isOpened ? TransactionForm(form.data) : ''}
+      ${List(transactions)}
+    </div>
   `;
 };
 
-render();
+renderApp();
 
-function list() {
-  let content = ``;
-  const { transactions } = window.userDataStore;
-  for (let x in transactions) {
-    const { sum, date, category, comment } = transactions[x];
-    content += `
-      <li style="display:flex; justify-content: space-between">
-        <span>${sum}</span>
-        <span>${date}</span>
-        <span>${category}</span>
-        <span>${comment}</span>
-      </li>`;
-  }
-  return `<ul>${content}</ul>`;
+function Main(balance) {
+  return `
+    <div class="${styles.main}">
+      <span>BALANCE: ${balance}</span>
+
+      <button
+        class=${styles['btn-add']}
+        onclick="loadEmptyForm()"
+      >
+        +
+      </button>
+    </div>
+  `;
 }
-function form() {
-  const handler = function (e) {
-    e.preventDefault();
 
-    const data = new FormData(e.target);
+function List(transactions) {
+  let items = ``;
 
-    const transaction = {};
+  for (let id in transactions) {
+    const { sum, date, category, comment } = transactions[id];
+    const categoryGroup = sum < 0 ? 'outcome' : 'income';
 
-    for (let [name, value] of data) {
-      transaction[name] = value;
-    }
+    items += `
+      <li id="${id}" class=${styles['list-item']}>
+        <span style="width:30%">${getDateString(date)}</span>
+        <span style="width:15%">${sum}</span>
+        <span>${userDataStore.categories[categoryGroup][category]}</span>
+        <span style="width:25%">${comment}</span>
 
-    window.userDataStore.transactions[Date.now()] = transaction;
-    // console.clear();
-    // console.log(window.userDataStore.transactions);
-    e.target.reset();
-  };
+        <button
+          
+          class=${styles['btn-edit']}
+          onclick="loadTransactionInForm(event)"
+        >
+          🖉
+        </button>
+
+        <button
+          class=${styles['btn-delete']}
+          onclick="deleteTransaction(event)"
+        >
+          X
+        </button>
+      </li>
+    `;
+  }
+
+  return `<ul class=${styles.list}>${items}</ul>`;
+}
+
+function TransactionForm(transaction) {
+  const moneyWay = +transaction.sum > 0 ? 'income' : 'outcome';
+  const { comment, category } = transaction;
+  const sum = transaction.sum ? Math.abs(transaction.sum) : '';
+  const date = formatDate(transaction.date);
 
   return `
-    <form 
-      onsubmit="((event) => {
-        event.preventDefault();
-    
-        const data = new FormData(event.target);
+    <form class=${styles.form} onsubmit="addTransactionInDB(event)">
+      ${Sum(sum)}
+      ${DateInput(date)}
+      ${Comment(comment)}
+      ${Category(category)}
 
-        const transaction = {}
-    
-        for(let [name, value] of data) {
-          transaction[name] = value
-        }
+      <button type="button" class="cancel" onclick="cancel(event)">
+        cancel
+      </button>
 
-        window.userDataStore.transactions[Date.now()] = transaction
-       
-        console.log(window.userDataStore.transactions);
-        event.target.reset();
-        window.render();
-      })(event)"
-    >
-      ${sum() + date() + catInput() + comment()}
-      <input type="submit" value="add"/>
+      <input class="add" type="submit" value="add" />
     </form>
   `;
+
+  function Sum(value) {
+    return `
+      <input
+        type="number"
+        placeholder="sum"
+        name="sum"
+        min="1"
+        value ="${value}"
+        required
+      >
+    `;
+  }
+
+  function Category(chosenCategoryID) {
+    const handler = e => {
+      document.querySelector('#categories').innerHTML = userDataStore.categories[e.target.value]
+        .map((category, i) => `<option value=${i}>${category}</option>`)
+        .join('');
+    };
+
+    return `
+      <div onchange="(${handler})(event)">
+        <label>
+          <input
+            type="radio"
+            name="moneyWay"
+            value="income"
+            ${moneyWay == 'income' ? 'checked' : ''}
+          />
+          income
+        </label>
+
+        <label>
+          <input 
+            type="radio"
+            name="moneyWay" 
+            value="outcome" 
+            ${moneyWay == 'outcome' ? 'checked' : ''}
+          />
+          outcome
+        </label>
+      </div>
+
+      <br>
+
+      <select name="category" id="categories">
+        ${userDataStore.categories[moneyWay]
+          .map(
+            (category, i) => `
+              <option ${chosenCategoryID == i ? 'selected' : ''} value=${i}> 
+                ${category}
+              </option>
+            `,
+          )
+          .join('')}
+      </select>
+    `;
+  }
+
+  function DateInput(dateValue) {
+    return `
+      <input
+        name="date"
+        type="datetime-local" 
+        placeholder="date"
+        value=${dateValue}
+      />
+    `;
+  }
+
+  function Comment(content) {
+    return `
+      <input 
+        type="text"
+        placeholder="comment"
+        name="comment"
+        value="${content}"
+      />
+    `;
+  }
 }
 
-function moneyWay() {
-  const handler = function (e) {
-    userDataStore.moneyWay = e.target.value;
-    render();
+//////////////////////////////////////////////////////
+
+window.cancel = function (e) {
+  e.preventDefault();
+  hideForm();
+  renderApp();
+};
+
+window.loadEmptyForm = function () {
+  userDataStore.form.transactionId = Date.now();
+
+  userDataStore.form.data = {
+    sum: '',
+    date: Date.now(),
+    category: 1,
+    comment: '',
   };
 
-  return `
-    <label>
-      <input 
-        name="moneyWay" 
-        value="income"
-        type="radio"
-        ${userDataStore.moneyWay == 'income' ? 'checked' : ''}
-        onchange="(${handler})(event)"
-      />
-      income
-    </label>
-    <label>
-      <input 
-        name="moneyWay" 
-        value="outcome" 
-        type="radio"
-        ${userDataStore.moneyWay == 'income' ? '' : 'checked'}
-        onchange="(${handler})(event)"
-      />
-      outcome
-    </label>
-    <br>
+  showForm();
+  renderApp();
+  document.forms[0].sum.focus();
+};
 
-  `;
-}
+window.loadTransactionInForm = function (e) {
+  const transactionID = e.target.parentElement.id;
+  userDataStore.form.transactionId = transactionID;
 
-function catInput() {
-  return `
-    <select name="category">
-      ${window.userDataStore.categories[window.userDataStore.moneyWay].map(
-        (category, i) => `<option>&#128512; ${category}</option>`,
-      )}
-    </select>
-  `;
-}
+  userDataStore.form.data = { ...userDataStore.transactions[transactionID] };
 
-function sum() {
-  return `
-    <input type="number" placeholder="sum" name="sum" required/>
-  `;
-}
+  userDataStore.form.cachedBalance =
+    userDataStore.balance - +userDataStore.transactions[transactionID].sum;
 
-function date() {
-  return `
-    <input
-      name="date"
-      type="datetime-local" 
-      placeholder="date"
-      value=${formatDate(Date.now())}
-    />
-  `;
-}
+  showForm();
+  renderApp();
+  document.forms[0].sum.focus();
+};
 
-function comment() {
-  return `
-    <input 
-      type="text" 
-      placeholder="comment"
-      name="comment"
-    />
-  `;
-}
+window.deleteTransaction = function (e) {
+  userDataStore.balance -= userDataStore.transactions[e.target.parentElement.id].sum;
+  delete userDataStore.transactions[e.target.parentElement.id];
+  renderApp();
+};
 
-function formatDate(timestamp) {
-  const d = new Date(timestamp);
+window.addTransactionInDB = function (e) {
+  //вот здесь обратная конвертация
+  e.preventDefault();
 
-  const DD = d.getDate() > 9 ? d.getDate() : `0${d.getDate()}`;
-  const MM = d.getMonth() + 1 > 9 ? d.getMonth() + 1 : `0${d.getMonth() + 1}`;
-  const YYYY = d.getFullYear();
+  const id = userDataStore.form.transactionId;
+  const { sum, date, category, comment, moneyWay } = e.target.elements;
 
-  const HH = d.getHours() > 9 ? d.getHours() : `0${d.getHours()}`;
-  const MI = d.getMinutes() > 9 ? d.getMinutes() : `0${d.getMinutes()}`;
+  userDataStore.transactions[id] = {
+    sum: moneyWay.value == 'income' ? +sum.value : -sum.value,
+    date: new Date(date.value).getTime(),
+    category: +category.value,
+    comment: comment.value,
+  };
 
-  return `${YYYY}-${MM}-${DD}T${HH}:${MI}`;
-}
+  userDataStore.balance += userDataStore.transactions[id].sum - userDataStore.form.data.sum;
+
+  hideForm();
+  window.renderApp();
+};
+
+window.showForm = function () {
+  userDataStore.form.isOpened = true;
+};
+
+window.hideForm = function () {
+  userDataStore.form.isOpened = false;
+};
+
+window.formatDate = formatDate;

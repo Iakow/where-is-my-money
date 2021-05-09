@@ -1,0 +1,56 @@
+.main {
+  display: flex;
+  justify-content: space-between;
+  font-size: 48px;
+}
+
+.app-container {
+  font-family: Arial, Helvetica, sans-serif;
+  /* margin: 0 200px; */
+  position: relative;
+}
+
+.list {
+  margin: 30px 0;
+  padding: 0;
+}
+
+.list-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+}
+
+.form {
+  margin: 0;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  top: 0;
+  left: 0;
+}
+
+.btn-edit {
+  background-color: transparent;
+  border: none;
+  font-size: 20px;
+}
+
+.btn-edit:hover {
+  background-color: grey;
+  cursor: pointer;
+}
+
+.btn-add {
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  border: none;
+  font-size: 30px;
+}
+
+.btn-add:hover {
+  cursor: pointer;
+  background-color: grey;
+}
