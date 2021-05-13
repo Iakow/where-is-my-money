@@ -1,53 +1,32 @@
 import { formatDate, getDateString } from './utils';
 import styles from './style.css';
-import { func } from 'prop-types';
+import {
+  connectFirebase,
+  register,
+  removeTransaction,
+  setBalance,
+  getUserDB,
+  getTransactions,
+  addNewTransaction,
+  getBalance,
+  getCategories,
+  editTransaction,
+} from './rest.js';
 
 window.userDataStore = {
-  categories: {
-    outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
-    income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
-  },
-  balance: 0,
-  transactions: {
-    1619114621421: {
-      sum: 500,
-      moneyWay: '',
-      date: 1619114621421,
-      category: 1,
-      comment: 'Какая-то фигня',
-    },
-    1619208263117: {
-      sum: 10000,
-      date: 1619208263117,
-      category: 0,
-      comment: '',
-    },
-    1619208282263: {
-      sum: -1000,
-      date: 1619208282263,
-      category: 0,
-      comment: 'Педали',
-    },
-    1619208293067: {
-      sum: -245,
-      date: 1619208293067,
-      category: 4,
-      comment: '',
-    },
-    1619208307065: {
-      sum: -50,
-      date: 1619208307065,
-      category: 4,
-      comment: '',
-    },
-  },
+  categories: null,
+  balance: null,
+  transactions: null,
   form: {
     isOpened: false,
     transactionId: null,
-    cachedBalance: 0,
     data: null,
   },
 };
+
+connectFirebase();
+
+document.querySelector('#app').innerHTML = `Loading...`;
 
 window.renderApp = () => {
   const { balance, transactions, form } = userDataStore;
@@ -60,8 +39,6 @@ window.renderApp = () => {
     </div>
   `;
 };
-
-renderApp();
 
 function Main(balance) {
   return `
@@ -218,6 +195,13 @@ function TransactionForm(transaction) {
 
 //////////////////////////////////////////////////////
 
+function storeUserData(data) {
+  window.userDataStore.balance = data.balance;
+  window.userDataStore.transactions = data.transactions;
+  window.userDataStore.categories = data.categories;
+}
+
+////////////////////////////////////////
 window.cancel = function (e) {
   e.preventDefault();
   hideForm();
@@ -225,8 +209,6 @@ window.cancel = function (e) {
 };
 
 window.loadEmptyForm = function () {
-  userDataStore.form.transactionId = Date.now();
-
   userDataStore.form.data = {
     sum: '',
     date: Date.now(),
@@ -245,38 +227,61 @@ window.loadTransactionInForm = function (e) {
 
   userDataStore.form.data = { ...userDataStore.transactions[transactionID] };
 
-  userDataStore.form.cachedBalance =
-    userDataStore.balance - +userDataStore.transactions[transactionID].sum;
-
   showForm();
   renderApp();
   document.forms[0].sum.focus();
 };
 
+////////////////////////////////////////////////////
+
 window.deleteTransaction = function (e) {
-  userDataStore.balance -= userDataStore.transactions[e.target.parentElement.id].sum;
-  delete userDataStore.transactions[e.target.parentElement.id];
-  renderApp();
+  const id = e.target.parentElement.id;
+  const newBalance = userDataStore.balance - userDataStore.transactions[id].sum;
+
+  removeTransaction(id)
+    .then(() => setBalance(newBalance))
+    .then(() => getUserDB())
+    .then(result => storeUserData(result))
+    .then(() => renderApp());
 };
 
 window.addTransactionInDB = function (e) {
-  //вот здесь обратная конвертация
   e.preventDefault();
 
-  const id = userDataStore.form.transactionId;
   const { sum, date, category, comment, moneyWay } = e.target.elements;
 
-  userDataStore.transactions[id] = {
+  const newTransaction = {
     sum: moneyWay.value == 'income' ? +sum.value : -sum.value,
     date: new Date(date.value).getTime(),
     category: +category.value,
     comment: comment.value,
   };
 
-  userDataStore.balance += userDataStore.transactions[id].sum - userDataStore.form.data.sum;
+  const initialFormSum = +userDataStore.form.data.sum;
+  const newBalance = userDataStore.balance + newTransaction.sum - initialFormSum;
 
-  hideForm();
-  window.renderApp();
+  // вот здесь чет не очт
+  if (userDataStore.form.transactionId) {
+    editTransaction(userDataStore.form.transactionId, newTransaction)
+      .then(() => {
+        hideForm();
+        window.renderApp();
+      })
+      .then(() => setBalance(newBalance))
+      .then(() => getUserDB())
+      .then(result => storeUserData(result))
+      .then(() => window.renderApp());
+  } else {
+    addNewTransaction(newTransaction)
+      .then(() => {
+        hideForm();
+        window.renderApp();
+      })
+      .then(() => setBalance(newBalance))
+      .then(() => getUserDB())
+      .then(result => storeUserData(result))
+      .then(() => window.renderApp());
+  }
 };
 
 window.showForm = function () {

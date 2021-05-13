@@ -26,7 +26,8 @@
   },
   "homepage": "https://github.com/kottans/framework-2021#readme",
   "dependencies": {
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "rest.js": "^0.2.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.14",
