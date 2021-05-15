@@ -1,4 +1,4 @@
-export function connectFirebase() {
+export function connectFirebase(handleData) {
   const firebaseConfig = {
     apiKey: 'AIzaSyBwtSg-c3xYVJkNSDA49afwTxu6rA2JBDI',
     authDomain: 'kottans-app.firebaseapp.com',
@@ -12,7 +12,6 @@ export function connectFirebase() {
 
   firebase.initializeApp(firebaseConfig);
 
-  // добавляю обзервер
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
       window.UID = user.uid;
@@ -21,12 +20,7 @@ export function connectFirebase() {
         .getIdToken()
         .then(token => (window.TOKEN = token))
         .then(() => getUserDB())
-        .then(data => {
-          window.userDataStore.balance = data.balance;
-          window.userDataStore.transactions = data.transactions;
-          window.userDataStore.categories = data.categories;
-        })
-        .then(() => window.renderApp())
+        .then(data => handleData(data))
         .catch(/* error => fconsole.log(error.message) */);
     } else {
       //jconsole.log('need login');
@@ -160,10 +154,6 @@ export async function getUserDB() {
 
   let result = await response.json();
 
-  // window.userDataStore.balance = result.balance;
-  // window.userDataStore.transactions = result.transactions;
-  // window.userDataStore.categories = result.categories;
-
   return result;
 }
 
@@ -178,6 +168,7 @@ export async function removeTransaction(id) {
   let result = await response.json();
 }
 
+// надо бы PATH
 export async function editTransaction(id, data) {
   let response = await fetch(
     `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/transactions/${id}.json?auth=${window.TOKEN}`,
