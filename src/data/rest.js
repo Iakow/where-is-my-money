@@ -1,3 +1,5 @@
+import dataStore from '../data/dataStore';
+
 export function connectFirebase(handleData) {
   const firebaseConfig = {
     apiKey: 'AIzaSyBwtSg-c3xYVJkNSDA49afwTxu6rA2JBDI',
@@ -14,11 +16,11 @@ export function connectFirebase(handleData) {
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      window.UID = user.uid;
+      dataStore.auth.UID = user.uid;
 
       user
         .getIdToken()
-        .then(token => (window.TOKEN = token))
+        .then(token => (dataStore.auth.TOKEN = token))
         .then(() => getUserDB())
         .then(data => handleData(data))
         .catch(/* error => fconsole.log(error.message) */);
@@ -72,7 +74,7 @@ export function register(mail) {
     .createUserWithEmailAndPassword(mail, '135790')
     .then(userCredential => {
       var user = userCredential.user;
-      window.UID = user.uid;
+      dataStore.auth.UID = user.uid;
 
       return user;
     })
@@ -80,10 +82,10 @@ export function register(mail) {
       return user.getIdToken();
     })
     .then(token => {
-      window.TOKEN = token;
+      dataStore.auth.TOKEN = token;
     })
     .then(() => {
-      initializeUserDB(UID);
+      initializeUserDB(dataStore.auth.UID);
     })
     .catch(error => {
       var errorCode = error.code;
@@ -94,16 +96,16 @@ export function register(mail) {
 /* не нужна, т.к. нужен и баланс же */
 export async function getTransactions() {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/transactions.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions.json?auth=${dataStore.auth.TOKEN}`,
   );
 
   let result = await response.json();
-  window.userDataStore.transactions = result;
+  dataStore.userData.transactions = result;
 }
 
 export async function addNewTransaction(transaction) {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/transactions.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'POST',
       body: JSON.stringify(transaction),
@@ -117,7 +119,7 @@ export async function addNewTransaction(transaction) {
 
 export async function setBalance(balance) {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/balance.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/balance.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'PUT',
       body: JSON.stringify(balance),
@@ -129,27 +131,27 @@ export async function setBalance(balance) {
 
 export async function getBalance() {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/balance.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/balance.json?auth=${dataStore.auth.TOKEN}`,
   );
 
   let result = await response.json();
 
-  window.userDataStore.balance = result;
+  dataStore.userData.balance = result;
 }
 
 export async function getCategories() {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/categories.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/categories.json?auth=${dataStore.auth.TOKEN}`,
   );
 
   let result = await response.json();
 
-  window.userDataStore.categories = result;
+  dataStore.userData.categories = result;
 }
 
 export async function getUserDB() {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}.json?auth=${dataStore.auth.TOKEN}`,
   );
 
   let result = await response.json();
@@ -159,7 +161,7 @@ export async function getUserDB() {
 
 export async function removeTransaction(id) {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}/transactions/${id}.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions/${id}.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'DELETE',
     },
@@ -171,7 +173,7 @@ export async function removeTransaction(id) {
 // надо бы PATH
 export async function editTransaction(id, data) {
   let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${window.UID}/transactions/${id}.json?auth=${window.TOKEN}`,
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions/${id}.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'PUT',
       body: JSON.stringify(data),

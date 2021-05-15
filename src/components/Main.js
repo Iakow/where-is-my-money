@@ -4,29 +4,15 @@ import { createElement, createFragment } from '../framework/element';
 
 import styles from '../style';
 import renderApp from '../framework/render';
+import dataStore from '../data/dataStore';
 
-window.openTransactionForm = openTransactionForm;
-
-export default function Main(balance) {
-  /* return `
-    <div class="${styles.main}">
-      <span>BALANCE: ${balance}</span>
-
-      <button
-        class=${styles['btn-add']}
-        onclick="openTransactionForm()"
-      >
-        +
-      </button>
-    </div>
-  `; */
-
+export default function Main(props) {
   return (
     <>
-      <div className={styles.main}>
-        <span>BALANCE: {balance}</span>
+      <div class={styles.main}>
+        <span>BALANCE: {props.balance}</span>
 
-        <button className={styles['btn-add']} onclick={openTransactionForm}>
+        <button class={styles['btn-add']} onClick={openTransactionForm}>
           +
         </button>
       </div>
@@ -35,13 +21,13 @@ export default function Main(balance) {
 }
 
 function openTransactionForm() {
-  window.userDataStore.form.data = {
+  dataStore.transactionForm.data = {
     sum: '',
     date: Date.now(),
     category: 1,
     comment: '',
   };
-  window.userDataStore.form.isOpened = true;
+  dataStore.transactionForm.isOpened = true;
 
   renderApp();
   document.forms[0].sum.focus();

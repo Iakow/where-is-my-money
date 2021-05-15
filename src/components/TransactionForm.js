@@ -1,113 +1,83 @@
+/** @jsx createElement */
+/*** @jsxFrag createFragment */
+import { createElement, createFragment } from '../framework/element';
+
 import styles from '../style';
 import renderApp from '../framework/render';
-import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../rest';
+import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../data/rest';
+import { getHTMLDate } from '../utils';
+import dataStore from '../data/dataStore';
 
-window.refreshUserData = refreshUserData;
+let moneyWay;
 
-export default function TransactionForm(transaction) {
-  const moneyWay = +transaction.sum > 0 ? 'income' : 'outcome';
+export default function TransactionForm({ transaction }) {
+  moneyWay = +transaction.sum > 0 ? 'income' : 'outcome';
   const { comment, category } = transaction;
   const sum = transaction.sum ? Math.abs(transaction.sum) : '';
-  const date = formatDate(transaction.date);
+  const date = getHTMLDate(transaction.date);
 
-  return `
-    <form class=${styles.form} onsubmit="addTransactionInDB(event)">
-      ${Sum(sum)}
-      ${DateInput(date)}
-      ${Comment(comment)}
-      ${Category(category)}
+  return (
+    <form class={styles.form} onsubmit={addTransactionInDB}>
+      <Sum value={sum} />
+      <DateInput value={date} />
+      <Category value={category} />
+      <Comment value={comment} />
 
-      <button type="button" class="cancel" onclick="cancel(event)">
+      <button type="button" class="cancel" onclick={cancel}>
         cancel
       </button>
-
       <input class="add" type="submit" value="add" />
     </form>
-  `;
+  );
+}
 
-  function Sum(value) {
-    return `
-      <input
-        type="number"
-        placeholder="sum"
-        name="sum"
-        min="1"
-        value ="${value}"
-        required
-      >
-    `;
-  }
+function Sum({ value }) {
+  return <input type="number" placeholder="sum" name="sum" min="1" value={value} required />;
+}
 
-  function Category(chosenCategoryID) {
-    const handler = e => {
-      document.querySelector('#categories').innerHTML = userDataStore.categories[e.target.value]
-        .map((category, i) => `<option value=${i}>${category}</option>`)
-        .join('');
-    };
+function Category({ value }) {
+  const handler = e => {
+    document.querySelector('#categories').innerHTML = dataStore.userData.categories[e.target.value]
+      .map((category, i) => `<option value=${i}>${category}</option>`)
+      .join('');
+  };
 
-    return `
-      <div onchange="(${handler})(event)">
+  return (
+    <>
+      <div onchange={handler}>
         <label>
-          <input
-            type="radio"
-            name="moneyWay"
-            value="income"
-            ${moneyWay == 'income' ? 'checked' : ''}
-          />
+          <input type="radio" name="moneyWay" value="income" checked={moneyWay == 'income'} />
           income
         </label>
 
         <label>
-          <input 
-            type="radio"
-            name="moneyWay" 
-            value="outcome" 
-            ${moneyWay == 'outcome' ? 'checked' : ''}
-          />
+          <input type="radio" name="moneyWay" value="outcome" checked={moneyWay == 'outcome'} />
           outcome
         </label>
       </div>
 
-      <br>
+      <br />
 
       <select name="category" id="categories">
-        ${userDataStore.categories[moneyWay]
-          .map(
-            (category, i) => `
-              <option ${chosenCategoryID == i ? 'selected' : ''} value=${i}> 
-                ${category}
-              </option>
-            `,
-          )
-          .join('')}
+        {dataStore.userData.categories[moneyWay].map((category, i) => (
+          <option selected={value == i} value={i}>
+            {category}
+          </option>
+        ))}
       </select>
-    `;
-  }
-
-  function DateInput(dateValue) {
-    return `
-      <input
-        name="date"
-        type="datetime-local" 
-        placeholder="date"
-        value=${dateValue}
-      />
-    `;
-  }
-
-  function Comment(content) {
-    return `
-      <input 
-        type="text"
-        placeholder="comment"
-        name="comment"
-        value="${content}"
-      />
-    `;
-  }
+    </>
+  );
 }
 
-window.addTransactionInDB = function (e) {
+function DateInput({ value }) {
+  return <input name="date" type="datetime-local" placeholder="date" value={value} />;
+}
+
+function Comment({ value }) {
+  return <input type="text" placeholder="comment" name="comment" value={value} />;
+}
+
+function addTransactionInDB(e) {
   e.preventDefault();
 
   const { sum, date, category, comment, moneyWay } = e.target.elements;
@@ -119,14 +89,14 @@ window.addTransactionInDB = function (e) {
     comment: comment.value,
   };
 
-  const initialFormSum = +userDataStore.form.data.sum;
-  const newBalance = userDataStore.balance + newTransaction.sum - initialFormSum;
+  const initialFormSum = +dataStore.transactionForm.data.sum;
+  const newBalance = dataStore.userData.balance + newTransaction.sum - initialFormSum;
 
   // вот здесь чет не очт
-  if (userDataStore.form.transactionId) {
-    editTransaction(userDataStore.form.transactionId, newTransaction)
+  if (dataStore.transactionForm.transactionId) {
+    editTransaction(dataStore.transactionForm.transactionId, newTransaction)
       .then(() => {
-        hideForm();
+        dataStore.transactionForm.isOpened = false;
         renderApp();
       })
       .then(() => setBalance(newBalance))
@@ -135,24 +105,24 @@ window.addTransactionInDB = function (e) {
   } else {
     addNewTransaction(newTransaction)
       .then(() => {
-        hideForm();
+        dataStore.transactionForm.isOpened = false;
         renderApp();
       })
       .then(() => setBalance(newBalance))
       .then(() => getUserDB())
       .then(data => refreshUserData(data));
   }
-};
+}
 
-window.cancel = function (e) {
+function cancel(e) {
   e.preventDefault();
-  hideForm();
+  dataStore.transactionForm.isOpened = false;
   renderApp();
-};
+}
 
 function refreshUserData(data) {
-  window.userDataStore.balance = data.balance;
-  window.userDataStore.transactions = data.transactions;
-  window.userDataStore.categories = data.categories;
+  dataStore.userData.balance = data.balance;
+  dataStore.userData.transactions = data.transactions;
+  dataStore.userData.categories = data.categories;
   renderApp();
 }

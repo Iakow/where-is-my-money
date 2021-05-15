@@ -1,4 +1,4 @@
-export function formatDate(timestamp) {
+export function getHTMLDate(timestamp) {
   const d = new Date(timestamp);
 
   const DD = d.getDate() > 9 ? d.getDate() : `0${d.getDate()}`;
