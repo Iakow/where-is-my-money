@@ -2,12 +2,14 @@ import { connectFirebase } from './data/rest.js';
 import renderApp from './framework/render';
 import dataStore from './data/dataStore';
 
-document.querySelector('#app').innerHTML = `Loading...`;
-connectFirebase(refreshUserData);
+renderApp();
 
-function refreshUserData(data) {
-  dataStore.userData.balance = data.balance;
-  dataStore.userData.transactions = data.transactions;
-  dataStore.userData.categories = data.categories;
+// коллбэк можно запихнуть в rest, а может и вообще сделать для ФБ отдельный
+connectFirebase(data => {
+  dataStore.setUserData(data);
+
+  // это неверно для разлогина!!!
+  // вообще это должно показываться когда юзер вошел, иначе ж будет форма логина
+  dataStore.userDataIsLoaded = true;
   renderApp();
-}
+});

@@ -101,7 +101,11 @@ function addTransactionInDB(e) {
       })
       .then(() => setBalance(newBalance))
       .then(() => getUserDB())
-      .then(data => refreshUserData(data));
+      .then(data => {
+        dataStore.setUserData(data);
+        dataStore.selectTransactions();
+        renderApp();
+      });
   } else {
     addNewTransaction(newTransaction)
       .then(() => {
@@ -110,7 +114,10 @@ function addTransactionInDB(e) {
       })
       .then(() => setBalance(newBalance))
       .then(() => getUserDB())
-      .then(data => refreshUserData(data));
+      .then(data => {
+        dataStore.setUserData(data);
+        renderApp();
+      });
   }
 }
 
@@ -120,9 +127,9 @@ function cancel(e) {
   renderApp();
 }
 
-function refreshUserData(data) {
+/* function setUserData(data) {
   dataStore.userData.balance = data.balance;
   dataStore.userData.transactions = data.transactions;
   dataStore.userData.categories = data.categories;
   renderApp();
-}
+} */

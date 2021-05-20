@@ -9,13 +9,13 @@ import { removeTransaction, setBalance, getUserDB } from '../data/rest';
 import dataStore from '../data/dataStore';
 
 export default function List({ transactions }) {
-  let items = [];
+  let totalSum = 0;
 
-  for (let id in transactions) {
-    const { sum, date, category, comment } = transactions[id];
+  const ListItems = transactions.map(({ id, date, category, comment, sum }) => {
     const categoryGroup = sum < 0 ? 'outcome' : 'income';
+    totalSum += sum;
 
-    items.push(
+    return (
       <li id={id} class={styles['list-item']}>
         <span style="width:30%">{getDateString(date)}</span>
         <span style="width:15%">{sum}</span>
@@ -29,14 +29,15 @@ export default function List({ transactions }) {
         <button class={styles['btn-delete']} onclick={deleteTransaction}>
           X
         </button>
-      </li>,
+      </li>
     );
-  }
+  });
 
   return (
-    <>
-      <ul class={styles.list}>{items}</ul>
-    </>
+    <ul class={styles.list}>
+      {ListItems}
+      <li>sum: {totalSum}</li>
+    </ul>
   );
 }
 
@@ -44,7 +45,10 @@ function loadTransactionInForm(e) {
   const transactionID = e.target.parentElement.id;
   dataStore.transactionForm.transactionId = transactionID;
 
-  dataStore.transactionForm.data = { ...dataStore.userData.transactions[transactionID] };
+  // не нужна деструктуризцаия?
+  dataStore.transactionForm.data = {
+    ...dataStore.userData.transactions.find(item => item.id === transactionID),
+  };
 
   dataStore.transactionForm.isOpened = true;
   renderApp();
@@ -53,16 +57,14 @@ function loadTransactionInForm(e) {
 
 function deleteTransaction(e) {
   const id = e.target.parentElement.id;
-  const newBalance = dataStore.userData.balance - dataStore.userData.transactions[id].sum;
+  const newBalance =
+    dataStore.userData.balance - dataStore.userData.transactions.find(item => item.id === id).sum;
 
   removeTransaction(id)
     .then(() => setBalance(newBalance))
     .then(() => getUserDB())
     .then(data => {
-      dataStore.userData.balance = data.balance;
-      dataStore.userData.transactions = data.transactions;
-      dataStore.userData.categories = data.categories;
-
+      dataStore.setUserData(data);
       renderApp();
     });
 }

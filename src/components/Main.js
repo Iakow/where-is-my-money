@@ -6,11 +6,11 @@ import styles from '../style';
 import renderApp from '../framework/render';
 import dataStore from '../data/dataStore';
 
-export default function Main(props) {
+export default function Main({ balance }) {
   return (
     <>
       <div class={styles.main}>
-        <span>BALANCE: {props.balance}</span>
+        <span>BALANCE: {balance}</span>
 
         <button class={styles['btn-add']} onClick={openTransactionForm}>
           +
