@@ -124,6 +124,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 const dataStore = {
   auth: {
     TOKEN: null,
@@ -134,14 +141,61 @@ const dataStore = {
     balance: null,
     transactions: null
   },
+  filteredTransactions: null,
+  sortBySum: 0,
+  sortByDate: 0,
+  filterMoneyway: 0,
+  filterDate: {
+    firstDate: 0,
+    // найти бы сразу минимальную дату
+    lastDate: Date.now()
+  },
+  userDataIsLoaded: false,
   transactionForm: {
     isOpened: false,
     transactionId: null,
     data: null
-  }
+  },
+  setUserData: setUserData,
+  selectTransactions: selectTransactions
 };
+
+function setUserData({
+  balance,
+  transactions,
+  categories
+}) {
+  if (balance !== undefined) this.userData.balance = balance;
+  if (categories !== undefined) this.userData.categories = categories;
+
+  if (transactions !== undefined) {
+    this.userData.transactions = Object.entries(transactions).map(([key, value]) => _objectSpread({
+      id: key
+    }, value));
+    this.selectTransactions();
+  }
+}
+
+function selectTransactions() {
+  this.filteredTransactions = [...this.userData.transactions];
+  this.filteredTransactions = this.filteredTransactions.filter(item => item.date >= dataStore.filterDate.firstDate && item.date <= dataStore.filterDate.lastDate);
+
+  if (this.filterMoneyway != 0) {
+    this.filteredTransactions = this.filteredTransactions.filter(item => this.filterMoneyway * item.sum < 0);
+  }
+
+  if (this.sortByDate != 0) {
+    this.filteredTransactions.sort((a, b) => this.sortByDate * (b.date - a.date));
+  }
+
+  if (this.sortBySum != 0) {
+    this.filteredTransactions.sort((a, b) => this.sortBySum * (a.sum - b.sum));
+  }
+}
+
 var _default = dataStore;
 exports.default = _default;
+window.dataStore = dataStore;
 },{}],"data/rest.js":[function(require,module,exports) {
 "use strict";
 
@@ -479,10 +533,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /** @jsx createElement */
 
 /** @jsxFrag createFragment */
-function Main(props) {
+function Main({
+  balance
+}) {
   return (0, _element.createElement)(_element.createFragment, null, (0, _element.createElement)("div", {
     class: _style.default.main
-  }, (0, _element.createElement)("span", null, "BALANCE: ", props.balance), (0, _element.createElement)("button", {
+  }, (0, _element.createElement)("span", null, "BALANCE: ", balance), (0, _element.createElement)("button", {
     class: _style.default['btn-add'],
     onClick: openTransactionForm
   }, "+")));
@@ -558,17 +614,17 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 function List({
   transactions
 }) {
-  let items = [];
-
-  for (let id in transactions) {
-    const {
-      sum,
-      date,
-      category,
-      comment
-    } = transactions[id];
+  let totalSum = 0;
+  const ListItems = transactions.map(({
+    id,
+    date,
+    category,
+    comment,
+    sum
+  }) => {
     const categoryGroup = sum < 0 ? 'outcome' : 'income';
-    items.push((0, _element.createElement)("li", {
+    totalSum += sum;
+    return (0, _element.createElement)("li", {
       id: id,
       class: _style.default['list-item']
     }, (0, _element.createElement)("span", {
@@ -583,18 +639,18 @@ function List({
     }, "\uD83D\uDD89"), (0, _element.createElement)("button", {
       class: _style.default['btn-delete'],
       onclick: deleteTransaction
-    }, "X")));
-  }
-
-  return (0, _element.createElement)(_element.createFragment, null, (0, _element.createElement)("ul", {
+    }, "X"));
+  });
+  return (0, _element.createElement)("ul", {
     class: _style.default.list
-  }, items));
+  }, ListItems, (0, _element.createElement)("li", null, "sum: ", totalSum));
 }
 
 function loadTransactionInForm(e) {
   const transactionID = e.target.parentElement.id;
-  _dataStore.default.transactionForm.transactionId = transactionID;
-  _dataStore.default.transactionForm.data = _objectSpread({}, _dataStore.default.userData.transactions[transactionID]);
+  _dataStore.default.transactionForm.transactionId = transactionID; // не нужна деструктуризцаия?
+
+  _dataStore.default.transactionForm.data = _objectSpread({}, _dataStore.default.userData.transactions.find(item => item.id === transactionID));
   _dataStore.default.transactionForm.isOpened = true;
   (0, _render.default)();
   document.forms[0].sum.focus();
@@ -602,15 +658,183 @@ function loadTransactionInForm(e) {
 
 function deleteTransaction(e) {
   const id = e.target.parentElement.id;
-  const newBalance = _dataStore.default.userData.balance - _dataStore.default.userData.transactions[id].sum;
+
+  const newBalance = _dataStore.default.userData.balance - _dataStore.default.userData.transactions.find(item => item.id === id).sum;
+
   (0, _rest.removeTransaction)(id).then(() => (0, _rest.setBalance)(newBalance)).then(() => (0, _rest.getUserDB)()).then(data => {
-    _dataStore.default.userData.balance = data.balance;
-    _dataStore.default.userData.transactions = data.transactions;
-    _dataStore.default.userData.categories = data.categories;
+    _dataStore.default.setUserData(data);
+
     (0, _render.default)();
   });
 }
-},{"../framework/element":"framework/element.js","../style":"style.css","../framework/render":"framework/render.js","../utils":"utils.js","../data/rest":"data/rest.js","../data/dataStore":"data/dataStore.js"}],"components/TransactionForm.js":[function(require,module,exports) {
+},{"../framework/element":"framework/element.js","../style":"style.css","../framework/render":"framework/render.js","../utils":"utils.js","../data/rest":"data/rest.js","../data/dataStore":"data/dataStore.js"}],"components/Filters.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = Filters;
+
+var _element = require("../framework/element");
+
+var _style = _interopRequireDefault(require("../style"));
+
+var _render = _interopRequireDefault(require("../framework/render"));
+
+var _dataStore = _interopRequireDefault(require("../data/dataStore"));
+
+var _utils = require("../utils");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/** @jsx createElement */
+
+/** @jsxFrag createFragment */
+function Filters() {
+  /* 
+    Меняем флаги - это состояние фльтров (в частности радиобаттонов), во-первых
+    При этом нужно получить новый массив для рендеринга
+    1. Это может делать сам рендерящийся компонент при каждом рендеринге, на основе флагов
+    2. Отфильтрованный массив можно хранить в стейте
+       Вопрос в том, кто будет это делать.
+       Этот массив должен формироваться при каждом событии из двух групп:
+        1. При изменении состояния фильтров
+        2. При изменении оригинального массива (добавление, удаление, редактирование)
+         Вот, кстати, интересна первая группа. Выходит, каждый раз при обновлении оригинального массива должна вызываться некая функция, которая на основании флагов сформирует второй массив. Эта функция должна вызываться в хендлерах добавления, удаления, редактирования. Т.е. ее надо будет откуда-то импортировать в каждый из этих файлов. 
+        И ее надо будет импортировать, очевидно, в Filters.
+        Она явно не должна быть расположена в Filters. 
+        ТОГДА ГДЕ???
+         Странно, наверное, держать в utils функцию, которая должна полагаться на стейт.
+        Странно что-то такое утилитарное импортировать из компонента в другой компонент.
+         И еще, setUserData и selectTransactions в чем-то же схожи. Первая формирует что-то в стейте на основе входных данных, вторая делает то же самое. 
+        Тогда может они стоят отдельного модуля?
+        Ну, или же лучше оставить их там, где они есть...
+  */
+  function handler({
+    target
+  }) {
+    if (target.name == 'sortBySum') {
+      _dataStore.default.sortByDate = 0;
+      _dataStore.default.sortBySum = +target.value;
+
+      _dataStore.default.selectTransactions();
+
+      (0, _render.default)();
+    } else if (target.name == 'sortByDate') {
+      _dataStore.default.sortBySum = 0;
+      _dataStore.default.sortByDate = +target.value;
+
+      _dataStore.default.selectTransactions();
+
+      (0, _render.default)();
+    } else if (target.name == 'filterMoneyway') {
+      _dataStore.default.filterMoneyway = +target.value;
+
+      _dataStore.default.selectTransactions();
+
+      (0, _render.default)();
+    }
+  }
+
+  const SortBySum = (0, _element.createElement)(_element.createFragment, null, "sortBySum", (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortBySum",
+    value: "0",
+    checked: _dataStore.default.sortBySum === 0
+  }), "Off"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortBySum",
+    value: "1",
+    checked: _dataStore.default.sortBySum === 1
+  }), "Up"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortBySum",
+    value: "-1",
+    checked: _dataStore.default.sortBySum === -1
+  }), "Down"));
+  const SortByDate = (0, _element.createElement)(_element.createFragment, null, "sortByDate", (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortByDate",
+    value: "0",
+    checked: _dataStore.default.sortByDate === 0
+  }), "Off"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortByDate",
+    value: "1",
+    checked: _dataStore.default.sortByDate === 1
+  }), "Up"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "sortByDate",
+    value: "-1",
+    checked: _dataStore.default.sortByDate === -1
+  }), "Down"));
+  const filterMoneyway = (0, _element.createElement)(_element.createFragment, null, "filterMoneyway", (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "filterMoneyway",
+    value: "0",
+    checked: _dataStore.default.filterMoneyway === 0
+  }), "All"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "filterMoneyway",
+    value: "1",
+    checked: _dataStore.default.filterMoneyway === 1
+  }), "Income"), (0, _element.createElement)("label", null, (0, _element.createElement)("input", {
+    type: "radio",
+    name: "filterMoneyway",
+    value: "-1",
+    checked: _dataStore.default.filterMoneyway === -1
+  }), "Outcome"));
+
+  const DateFilter = ({
+    value
+  }) => {
+    // Явно нужен DateInput который можно переиспользовать.
+    // собираюсь писать хендлеры...
+    function DateInput({
+      value,
+      name,
+      handler
+    }) {
+      return (0, _element.createElement)("input", {
+        name: name,
+        type: "datetime-local",
+        placeholder: "date",
+        value: (0, _utils.getHTMLDate)(value),
+        onchange: handler
+      });
+    }
+
+    function setDateFilter({
+      target
+    }) {
+      _dataStore.default.filterDate[target.name] = new Date(target.value).getTime();
+
+      _dataStore.default.selectTransactions();
+
+      (0, _render.default)();
+    }
+
+    return (0, _element.createElement)(_element.createFragment, null, (0, _element.createElement)(DateInput, {
+      value: value.start,
+      name: "firstDate",
+      handler: setDateFilter
+    }), (0, _element.createElement)(DateInput, {
+      value: value.end,
+      name: "lastDate",
+      handler: setDateFilter
+    }));
+  };
+
+  return (0, _element.createElement)("div", {
+    onchange: handler
+  }, SortBySum, (0, _element.createElement)("br", null), SortByDate, (0, _element.createElement)("br", null), filterMoneyway, (0, _element.createElement)("br", null), (0, _element.createElement)(DateFilter, {
+    value: {
+      start: _dataStore.default.filterDate.firstDate,
+      end: _dataStore.default.filterDate.lastDate
+    }
+  }));
+}
+},{"../framework/element":"framework/element.js","../style":"style.css","../framework/render":"framework/render.js","../data/dataStore":"data/dataStore.js","../utils":"utils.js"}],"components/TransactionForm.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -754,12 +978,22 @@ function addTransactionInDB(e) {
     (0, _rest.editTransaction)(_dataStore.default.transactionForm.transactionId, newTransaction).then(() => {
       _dataStore.default.transactionForm.isOpened = false;
       (0, _render.default)();
-    }).then(() => (0, _rest.setBalance)(newBalance)).then(() => (0, _rest.getUserDB)()).then(data => refreshUserData(data));
+    }).then(() => (0, _rest.setBalance)(newBalance)).then(() => (0, _rest.getUserDB)()).then(data => {
+      _dataStore.default.setUserData(data);
+
+      _dataStore.default.selectTransactions();
+
+      (0, _render.default)();
+    });
   } else {
     (0, _rest.addNewTransaction)(newTransaction).then(() => {
       _dataStore.default.transactionForm.isOpened = false;
       (0, _render.default)();
-    }).then(() => (0, _rest.setBalance)(newBalance)).then(() => (0, _rest.getUserDB)()).then(data => refreshUserData(data));
+    }).then(() => (0, _rest.setBalance)(newBalance)).then(() => (0, _rest.getUserDB)()).then(data => {
+      _dataStore.default.setUserData(data);
+
+      (0, _render.default)();
+    });
   }
 }
 
@@ -768,13 +1002,12 @@ function cancel(e) {
   _dataStore.default.transactionForm.isOpened = false;
   (0, _render.default)();
 }
-
-function refreshUserData(data) {
-  _dataStore.default.userData.balance = data.balance;
-  _dataStore.default.userData.transactions = data.transactions;
-  _dataStore.default.userData.categories = data.categories;
-  (0, _render.default)();
-}
+/* function setUserData(data) {
+  dataStore.userData.balance = data.balance;
+  dataStore.userData.transactions = data.transactions;
+  dataStore.userData.categories = data.categories;
+  renderApp();
+} */
 },{"../framework/element":"framework/element.js","../style":"style.css","../framework/render":"framework/render.js","../data/rest":"data/rest.js","../utils":"utils.js","../data/dataStore":"data/dataStore.js"}],"components/App.js":[function(require,module,exports) {
 "use strict";
 
@@ -785,47 +1018,46 @@ exports.default = App;
 
 var _element = require("../framework/element");
 
-var _style = _interopRequireDefault(require("../style.css"));
+var _dataStore = _interopRequireDefault(require("../data/dataStore"));
 
 var _Main = _interopRequireDefault(require("../components/Main"));
 
 var _List = _interopRequireDefault(require("../components/List"));
 
+var _Filters = _interopRequireDefault(require("../components/Filters"));
+
 var _TransactionForm = _interopRequireDefault(require("../components/TransactionForm"));
 
-var _dataStore = _interopRequireDefault(require("../data/dataStore"));
+var _style = _interopRequireDefault(require("../style.css"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /** @jsx createElement */
 
 /*** @jsxFrag createFragment */
-
-/* у меня весь UI строится на основе данных и ререндерится все глобально
-   может стоить данные загружать в Арр?
-   данные с севера - это ясно.
-   плюс транзакция, кот. открывается в форме
-   короче все, что нужно именно для компонентов.
-
-   Стоит ли отделять как-то стейт формы? А какой стейт, она же стейтлесс?
-*/
-function App(params) {
+function App() {
   const {
     balance,
     transactions
   } = _dataStore.default.userData;
   const transaction = _dataStore.default.transactionForm.data;
-  return (0, _element.createElement)("div", {
-    class: _style.default['app-container']
-  }, (0, _element.createElement)(_Main.default, {
-    balance: balance
-  }), (0, _element.createElement)(_List.default, {
-    transactions: transactions
-  }), _dataStore.default.transactionForm.isOpened ? (0, _element.createElement)(_TransactionForm.default, {
-    transaction: transaction
-  }) : null);
+  const showForm = _dataStore.default.transactionForm.isOpened;
+
+  if (!_dataStore.default.userDataIsLoaded) {
+    return (0, _element.createElement)("h1", null, "Loading...");
+  } else {
+    return (0, _element.createElement)("div", {
+      class: _style.default['app-container']
+    }, (0, _element.createElement)(_Main.default, {
+      balance: balance
+    }), (0, _element.createElement)(_List.default, {
+      transactions: _dataStore.default.filteredTransactions
+    }), (0, _element.createElement)(_Filters.default, null), showForm ? (0, _element.createElement)(_TransactionForm.default, {
+      transaction: transaction
+    }) : null);
+  }
 }
-},{"../framework/element":"framework/element.js","../style.css":"style.css","../components/Main":"components/Main.js","../components/List":"components/List.js","../components/TransactionForm":"components/TransactionForm.js","../data/dataStore":"data/dataStore.js"}],"framework/render.js":[function(require,module,exports) {
+},{"../framework/element":"framework/element.js","../data/dataStore":"data/dataStore.js","../components/Main":"components/Main.js","../components/List":"components/List.js","../components/Filters":"components/Filters.js","../components/TransactionForm":"components/TransactionForm.js","../style.css":"style.css"}],"framework/render.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -858,15 +1090,16 @@ var _dataStore = _interopRequireDefault(require("./data/dataStore"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-document.querySelector('#app').innerHTML = `Loading...`;
-(0, _rest.connectFirebase)(refreshUserData);
+(0, _render.default)(); // коллбэк можно запихнуть в rest, а может и вообще сделать для ФБ отдельный
 
-function refreshUserData(data) {
-  _dataStore.default.userData.balance = data.balance;
-  _dataStore.default.userData.transactions = data.transactions;
-  _dataStore.default.userData.categories = data.categories;
+(0, _rest.connectFirebase)(data => {
+  _dataStore.default.setUserData(data); // это неверно для разлогина!!! 
+  // вообще это должно показываться когда юзер вошел, иначе ж будет форма логина
+
+
+  _dataStore.default.userDataIsLoaded = true;
   (0, _render.default)();
-}
+});
 },{"./data/rest.js":"data/rest.js","./framework/render":"framework/render.js","./data/dataStore":"data/dataStore.js"}],"../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -895,7 +1128,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "45615" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "33661" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
