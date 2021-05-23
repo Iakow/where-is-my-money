@@ -129,7 +129,7 @@ export default function Filters() {
           type="datetime-local"
           placeholder="date"
           value={getHTMLDate(value)}
-          onchange={handler}
+          onChange={handler}
         />
       );
     }
