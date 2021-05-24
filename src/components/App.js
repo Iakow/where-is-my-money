@@ -56,7 +56,7 @@ export default function App() {
 
         {formIsOpen ? (
           <TransactionForm
-            balance={userData.balance}
+            balance={userData.balance} // why?
             transaction={formData}
             categories={userData.categories}
             closeForm={() => {
