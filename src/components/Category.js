@@ -1,24 +1,30 @@
 /** @jsx createElement */
 /** @jsxFrag createFragment */
 import { createElement, createFragment } from '../framework/element';
+import { useEffect, useState } from '../framework/hooks';
 
 export default function Category({ value, categories, moneyWay }) {
-  const handler = e => {
-    document.querySelector('#categories').innerHTML = categories[e.target.value]
-      .map((category, i) => `<option value=${i}>${category}</option>`)
-      .join('');
-  };
+  const [moneyWayState, setMoneyWayState] = useState(moneyWay);
 
   return (
     <>
-      <div onchange={handler}>
+      <div
+        onchange={({ target }) => {
+          setMoneyWayState(target.value);
+        }}
+      >
         <label>
-          <input type="radio" name="moneyWay" value="income" checked={moneyWay == 'income'} />
+          <input type="radio" name="moneyWay" value="income" checked={moneyWayState == 'income'} />
           income
         </label>
 
         <label>
-          <input type="radio" name="moneyWay" value="outcome" checked={moneyWay == 'outcome'} />
+          <input
+            type="radio"
+            name="moneyWay"
+            value="outcome"
+            checked={moneyWayState == 'outcome'}
+          />
           outcome
         </label>
       </div>
@@ -26,7 +32,7 @@ export default function Category({ value, categories, moneyWay }) {
       <br />
 
       <select name="category" id="categories">
-        {categories[moneyWay].map((category, i) =>
+        {categories[moneyWayState].map((category, i) =>
           value == i ? (
             <option selected value={i}>
               {category}

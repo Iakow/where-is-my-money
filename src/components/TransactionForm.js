@@ -23,8 +23,8 @@ export default function TransactionForm({
     moneyWay = +transaction.sum > 0 ? 'income' : 'outcome';
     comment = transaction.comment;
     category = transaction.category;
-    sum = Math.abs(transaction.sum);
-    initialSum = transaction.sum;
+    sum = Math.abs(transaction.sum); // ???
+    initialSum = transaction.sum; // ???
     date = getHTMLDate(transaction.date); // вот это лучше прямо в инпут запилить
     id = transaction.id;
   } else {
