@@ -23,3 +23,5 @@ export function getDateString(timestamp) {
 
   return `${DD}.${MM}.${YYYY} - ${HH}:${MI}`;
 }
+
+export const isFunction = func => typeof func === 'function';

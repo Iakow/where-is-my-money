@@ -3,162 +3,113 @@
 import { createElement, createFragment } from '../framework/element';
 
 import styles from '../style';
-import renderApp from '../framework/render';
-import dataStore from '../data/dataStore';
 import { getHTMLDate } from '../utils';
 
-export default function Filters() {
-  /* 
-    Меняем флаги - это состояние фльтров (в частности радиобаттонов), во-первых
-    При этом нужно получить новый массив для рендеринга
-    1. Это может делать сам рендерящийся компонент при каждом рендеринге, на основе флагов
-    2. Отфильтрованный массив можно хранить в стейте
-       Вопрос в том, кто будет это делать.
-       Этот массив должен формироваться при каждом событии из двух групп:
-        1. При изменении состояния фильтров
-        2. При изменении оригинального массива (добавление, удаление, редактирование)
-
-        Вот, кстати, интересна первая группа. Выходит, каждый раз при обновлении оригинального массива должна вызываться некая функция, которая на основании флагов сформирует второй массив. Эта функция должна вызываться в хендлерах добавления, удаления, редактирования. Т.е. ее надо будет откуда-то импортировать в каждый из этих файлов. 
-        И ее надо будет импортировать, очевидно, в Filters.
-        Она явно не должна быть расположена в Filters. 
-        ТОГДА ГДЕ???
-
-        Странно, наверное, держать в utils функцию, которая должна полагаться на стейт.
-        Странно что-то такое утилитарное импортировать из компонента в другой компонент.
-
-        И еще, setUserData и selectTransactions в чем-то же схожи. Первая формирует что-то в стейте на основе входных данных, вторая делает то же самое. 
-        Тогда может они стоят отдельного модуля?
-        Ну, или же лучше оставить их там, где они есть...
-  */
-
+export default function Filters({ value, setFilters }) {
   function handler({ target }) {
     if (target.name == 'sortBySum') {
-      dataStore.sortByDate = 0;
-      dataStore.sortBySum = +target.value;
-      dataStore.selectTransactions();
-      renderApp();
+      setFilters(filters => {
+        filters.sortBySum = +target.value;
+        filters.sortByDate = 0;
+        return filters;
+      });
     } else if (target.name == 'sortByDate') {
-      dataStore.sortBySum = 0;
-      dataStore.sortByDate = +target.value;
-      dataStore.selectTransactions();
-      renderApp();
+      setFilters(filters => {
+        filters.sortByDate = +target.value;
+        filters.sortBySum = 0;
+        return filters;
+      });
     } else if (target.name == 'filterMoneyway') {
-      dataStore.filterMoneyway = +target.value;
-      dataStore.selectTransactions();
-      renderApp();
+      setFilters(filters => {
+        filters.filterMoneyway = +target.value;
+        return filters;
+      });
+    } else if (target.name == 'firstDate' || target.name == 'lastDate') {
+      setFilters(filters => {
+        filters.filterDate[target.name] = new Date(target.value).getTime();
+        return filters;
+      });
     }
   }
 
-  const SortBySum = (
+  const SortBySum = ({ value }) => (
     <>
       sortBySum
       <label>
-        <input type="radio" name="sortBySum" value="0" checked={dataStore.sortBySum === 0} />
+        <input type="radio" name="sortBySum" value="0" checked={value === 0} />
         Off
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="1" checked={dataStore.sortBySum === 1} />
+        <input type="radio" name="sortBySum" value="1" checked={value === 1} />
         Up
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="-1" checked={dataStore.sortBySum === -1} />
+        <input type="radio" name="sortBySum" value="-1" checked={value === -1} />
         Down
       </label>
     </>
   );
 
-  const SortByDate = (
+  const SortByDate = ({ value }) => (
     <>
       sortByDate
       <label>
-        <input type="radio" name="sortByDate" value="0" checked={dataStore.sortByDate === 0} />
+        <input type="radio" name="sortByDate" value="0" checked={value === 0} />
         Off
       </label>
       <label>
-        <input type="radio" name="sortByDate" value="1" checked={dataStore.sortByDate === 1} />
+        <input type="radio" name="sortByDate" value="1" checked={value === 1} />
         Up
       </label>
       <label>
-        <input type="radio" name="sortByDate" value="-1" checked={dataStore.sortByDate === -1} />
+        <input type="radio" name="sortByDate" value="-1" checked={value === -1} />
         Down
       </label>
     </>
   );
 
-  const filterMoneyway = (
+  const FilterMoneyway = ({ value }) => (
     <>
       filterMoneyway
       <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          value="0"
-          checked={dataStore.filterMoneyway === 0}
-        />
+        <input type="radio" name="filterMoneyway" value="0" checked={value === 0} />
         All
       </label>
       <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          value="1"
-          checked={dataStore.filterMoneyway === 1}
-        />
+        <input type="radio" name="filterMoneyway" value="1" checked={value === 1} />
         Income
       </label>
       <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          value="-1"
-          checked={dataStore.filterMoneyway === -1}
-        />
+        <input type="radio" name="filterMoneyway" value="-1" checked={value === -1} />
         Outcome
       </label>
     </>
   );
 
   const DateFilter = ({ value }) => {
-    // Явно нужен DateInput который можно переиспользовать.
-
-    // собираюсь писать хендлеры...
-    function DateInput({ value, name, handler }) {
+    function DateInput({ value, name }) {
       return (
-        <input
-          name={name}
-          type="datetime-local"
-          placeholder="date"
-          value={getHTMLDate(value)}
-          onChange={handler}
-        />
+        <input name={name} type="datetime-local" placeholder="date" value={getHTMLDate(value)} />
       );
-    }
-
-    function setDateFilter({ target }) {
-      dataStore.filterDate[target.name] = new Date(target.value).getTime();
-      dataStore.selectTransactions();
-      renderApp();
     }
 
     return (
       <>
-        <DateInput value={value.start} name="firstDate" handler={setDateFilter} />
-        <DateInput value={value.end} name="lastDate" handler={setDateFilter} />
+        <DateInput value={value.firstDate} name="firstDate" />
+        <DateInput value={value.lastDate} name="lastDate" />
       </>
     );
   };
 
   return (
     <div onchange={handler}>
-      {SortBySum}
+      <SortBySum value={value.sortBySum} />
       <br />
-      {SortByDate}
+      <SortByDate value={value.sortByDate} />
       <br />
-      {filterMoneyway}
+      <FilterMoneyway value={value.filterMoneyway} />
       <br />
-      <DateFilter
-        value={{ start: dataStore.filterDate.firstDate, end: dataStore.filterDate.lastDate }}
-      />
+      <DateFilter value={value.filterDate} />
     </div>
   );
 }

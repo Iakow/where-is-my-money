@@ -23,9 +23,11 @@ export function connectFirebase(handleData) {
         .then(token => (dataStore.auth.TOKEN = token))
         .then(() => getUserDB())
         .then(data => handleData(data))
-        .catch(/* error => fconsole.log(error.message) */);
+        .catch(error => {
+          throw error;
+        });
     } else {
-      //jconsole.log('need login');
+      /* acondsole.log('need login'); */
     }
   });
 }
@@ -128,6 +130,8 @@ export async function setBalance(balance) {
 
   let result = await response.json();
 }
+
+window.setBalance = setBalance;
 
 export async function getBalance() {
   let response = await fetch(
