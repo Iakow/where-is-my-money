@@ -5,6 +5,10 @@ import { createElement, createFragment } from '../framework/element';
 import styles from '../style';
 import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../data/rest';
 import { getHTMLDate } from '../utils';
+import Sum from './Sum';
+import Category from './Category';
+import DateInput from './DateInput';
+import Comment from './Comment';
 
 export default function TransactionForm({
   balance,
@@ -21,7 +25,7 @@ export default function TransactionForm({
     category = transaction.category;
     sum = Math.abs(transaction.sum);
     initialSum = transaction.sum;
-    date = getHTMLDate(transaction.date);
+    date = getHTMLDate(transaction.date); // вот это лучше прямо в инпут запилить
     id = transaction.id;
   } else {
     moneyWay = 'outcome';
@@ -36,12 +40,14 @@ export default function TransactionForm({
     <form class={styles.form} onsubmit={addTransactionInDB}>
       <Sum value={sum} />
       <DateInput value={date} />
+      {/* а может категории таки просто передавать и все? */}
       <Category value={category} categories={categories} moneyWay={moneyWay} />
       <Comment value={comment} />
 
       <button type="button" class="cancel" onclick={closeForm}>
         cancel
       </button>
+
       <input class="add" type="submit" value="add" />
     </form>
   );
@@ -95,54 +101,4 @@ export default function TransactionForm({
         });
     }
   }
-}
-
-function Sum({ value }) {
-  return <input type="number" placeholder="sum" name="sum" min="1" value={value} required />;
-}
-
-function Category({ value, categories, moneyWay }) {
-  const handler = e => {
-    document.querySelector('#categories').innerHTML = categories[e.target.value]
-      .map((category, i) => `<option value=${i}>${category}</option>`)
-      .join('');
-  };
-
-  return (
-    <>
-      <div onchange={handler}>
-        <label>
-          <input type="radio" name="moneyWay" value="income" checked={moneyWay == 'income'} />
-          income
-        </label>
-
-        <label>
-          <input type="radio" name="moneyWay" value="outcome" checked={moneyWay == 'outcome'} />
-          outcome
-        </label>
-      </div>
-
-      <br />
-
-      <select name="category" id="categories">
-        {categories[moneyWay].map((category, i) =>
-          value == i ? (
-            <option selected value={i}>
-              {category}
-            </option>
-          ) : (
-            <option value={i}>{category}</option>
-          ),
-        )}
-      </select>
-    </>
-  );
-}
-
-function DateInput({ value }) {
-  return <input name="date" type="datetime-local" placeholder="date" value={value} />;
-}
-
-function Comment({ value }) {
-  return <input type="text" placeholder="comment" name="comment" value={value} />;
 }

@@ -57,7 +57,7 @@ function signout() {
   firebase.auth().signOut();
 }
 
-function signin(email) {
+function signin(email = 'ponomarykov@gmail.com') {
   firebase
     .auth()
     .signInWithEmailAndPassword(email, '135790')
@@ -130,8 +130,6 @@ export async function setBalance(balance) {
 
   let result = await response.json();
 }
-
-window.setBalance = setBalance;
 
 export async function getBalance() {
   let response = await fetch(

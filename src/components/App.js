@@ -4,7 +4,6 @@ import { createElement, createFragment } from '../framework/element';
 import { useEffect, useState } from '../framework/hooks';
 import { connectFirebase } from '../data/rest.js';
 
-import dataStore from '../data/dataStore';
 import Main from '../components/Main';
 import List from '../components/List';
 
