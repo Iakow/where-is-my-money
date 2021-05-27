@@ -19,12 +19,7 @@ export default function App() {
   useEffect(() => {
     if (!userDataIsLoaded) {
       connectFirebase(data => {
-        const { balance, categories } = data;
-        const transactions = Object.entries(data.transactions).map(([key, value]) => ({
-          id: key,
-          ...value,
-        }));
-        setUserData({ balance, categories, transactions });
+        setUserData(data);
         setIsLoaded(!userDataIsLoaded);
       });
     }
@@ -48,7 +43,7 @@ export default function App() {
           transactions={userData.transactions}
           categories={userData.categories}
           openForm={id => {
-            setFormData({ ...userData.transactions.find(item => item.id === id) });
+            setFormData(userData.transactions[id]);
             setFormIsOpen(true);
           }}
           setUserData={setUserData}
