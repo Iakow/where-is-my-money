@@ -8,8 +8,7 @@ import { getDateString } from '../utils';
 import Filters from '../components/Filters';
 import { removeTransaction, setBalance, getUserDB } from '../data/rest';
 
-export default function List({ setUserData, transactions, balance, categories, openForm }) {
-  //lastDate конфюзит, когда добавляется новая транзакция.
+export default function List({ transactions, categories, openForm }) {
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
     sortBySum: 0,
@@ -71,39 +70,15 @@ export default function List({ setUserData, transactions, balance, categories, o
         >
           🖉
         </button>
-
-        <button class={styles['btn-delete']} onclick={deleteTransaction}>
-          X
-        </button>
       </li>
     );
   });
 
   return (
     <>
-      <ul class={styles.list}>
-        {ListItems}
-        <li>sum: {totalSum}</li>
-      </ul>
+      <ul class={styles.list}>{ListItems}</ul>
 
       <Filters value={filters} setFilters={setFilters} />
     </>
   );
-
-  function deleteTransaction(e) {
-    const id = e.target.parentElement.id;
-    const newBalance = balance - transactions[id].sum;
-
-    removeTransaction(id)
-      .then(() => setBalance(newBalance))
-      .then(() => getUserDB())
-      .then(data => {
-        const { balance, categories } = data;
-        const transactions = Object.entries(data.transactions).map(([key, value]) => ({
-          id: key,
-          ...value,
-        }));
-        setUserData({ balance, categories, transactions });
-      });
-  }
 }
