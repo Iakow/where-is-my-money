@@ -38,7 +38,7 @@
 }
 
 .btn-edit:hover {
-  background-color: grey;
+  background-color: rgb(194, 194, 194);
   cursor: pointer;
 }
 
@@ -52,5 +52,24 @@
 
 .btn-add:hover {
   cursor: pointer;
-  background-color: grey;
+  background-color: rgb(194, 194, 194);
+}
+
+.red {
+  color: red;
+}
+
+.green {
+  color: green;
+}
+
+.btn-delete {
+  color: red;
+  border: none;
+  background-color: transparent;
+}
+
+.btn-delete:hover {
+  background-color: rgb(194, 194, 194);
+  cursor: pointer;
 }

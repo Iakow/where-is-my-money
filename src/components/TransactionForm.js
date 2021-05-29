@@ -4,7 +4,8 @@ import { createElement, createFragment } from '../framework/element';
 
 import styles from '../style';
 import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../data/rest';
-import { getHTMLDate } from '../utils';
+import { useEffect, useState, useRef } from '../framework/hooks';
+
 import Sum from './Sum';
 import Category from './Category';
 import DateInput from './DateInput';
@@ -16,89 +17,64 @@ export default function TransactionForm({
   categories,
   closeForm,
   setUserData,
+  handler,
 }) {
-  let moneyWay, comment, category, sum, initialSum, date, id;
+  //что-то сделать с initialSum, хотя, она нужна для подсчета balance
+  const initialDataValue = {
+    comment: '',
+    category: 1,
+    sum: '',
+    date: Date.now(),
+  };
 
-  if (transaction) {
-    moneyWay = +transaction.sum > 0 ? 'income' : 'outcome';
-    comment = transaction.comment;
-    category = transaction.category;
-    sum = Math.abs(transaction.sum); // ???
-    initialSum = transaction.sum; // ???
-    date = getHTMLDate(transaction.date); // вот это лучше прямо в инпут запилить
-    id = transaction.id;
-  } else {
-    moneyWay = 'outcome';
-    comment = '';
-    category = 1;
-    sum = '';
-    initialSum = 0;
-    date = getHTMLDate(Date.now());
-  }
+  const [data, setData] = useState(transaction || initialDataValue);
+  const [focus, setFocus] = useState('sum'); //must be node?
+  const [isIncome, setIsIncome] = useState(false);
+
+  // нужно представить, что форма рендерится просто всегда, кнопкой туда просто отправляются данные
+  useEffect(() => {
+    setData(transaction);
+  }, [transaction]);
+
+  const updateData = (name, value) => {
+    setData(data => {
+      data[name] = value;
+      return data;
+    });
+  };
 
   return (
-    <form class={styles.form} onsubmit={addTransactionInDB}>
-      <Sum value={sum} />
-      <DateInput value={date} />
-      {/* а может категории таки просто передавать и все? */}
-      <Category value={category} categories={categories} moneyWay={moneyWay} />
-      <Comment value={comment} />
+    <form
+      class={styles.form}
+      onsubmit={e => {
+        e.preventDefault();
+        handler(data);
+        setData(null);
+      }}
+    >
+      <Sum value={data.sum} handler={updateData} />
+      <DateInput value={data.date} handler={updateData} />
+      {/* <Category value={data.category} categories={categories} moneyWay={moneyWay} />*/}
+      <Comment value={data.comment} handler={updateData} />
 
-      <button type="button" class="cancel" onclick={closeForm}>
+      <button
+        type="button"
+        class="cancel"
+        onclick={() => {
+          // TransactionForm.hooks=[];
+          closeForm();
+          /* setData({
+            comment: '',
+            category: 1,
+            sum: '',
+            date: Date.now(),
+          }); */
+        }}
+      >
         cancel
       </button>
 
       <input class="add" type="submit" value="add" />
     </form>
   );
-
-  function addTransactionInDB(e) {
-    e.preventDefault();
-
-    const { sum, date, category, comment, moneyWay } = e.target.elements;
-
-    const newTransaction = {
-      sum: moneyWay.value == 'income' ? +sum.value : -sum.value,
-      date: new Date(date.value).getTime(),
-      category: +category.value,
-      comment: comment.value,
-    };
-
-    const newBalance = balance + newTransaction.sum - initialSum;
-
-    // вот здесь чет не оч
-    if (id) {
-      editTransaction(id, newTransaction)
-        .then(() => {
-          // закрыть форму, обнулить данные формы
-        })
-        .then(() => setBalance(newBalance))
-        .then(() => getUserDB())
-        .then(data => {
-          const { balance, categories } = data;
-          const transactions = Object.entries(data.transactions).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-          setUserData({ balance, categories, transactions });
-          closeForm();
-        });
-    } else {
-      addNewTransaction(newTransaction)
-        .then(() => {
-          // закрыть форму, обнулить данные формы
-        })
-        .then(() => setBalance(newBalance))
-        .then(() => getUserDB())
-        .then(data => {
-          const { balance, categories } = data;
-          const transactions = Object.entries(data.transactions).map(([key, value]) => ({
-            id: key,
-            ...value,
-          }));
-          setUserData({ balance, categories, transactions });
-          closeForm();
-        });
-    }
-  }
 }

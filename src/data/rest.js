@@ -13,6 +13,7 @@ export function connectFirebase(handleData) {
   };
 
   firebase.initializeApp(firebaseConfig);
+  signin('ponomarykov@gmail.com', '135790');
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
@@ -184,3 +185,5 @@ export async function editTransaction(id, data) {
 
   let result = await response.json();
 }
+
+window.signout = signout;
