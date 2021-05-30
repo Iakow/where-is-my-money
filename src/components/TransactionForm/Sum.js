@@ -1,6 +1,6 @@
 /** @jsx createElement */
 /** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
+import { createElement, createFragment } from '../../framework/element';
 
 export default function Sum({ value, handler }) {
   return (
@@ -10,10 +10,10 @@ export default function Sum({ value, handler }) {
       autofocus
       name="sum"
       min="1"
-      value={value}
+      value={value === 0 ? '' : value}
       required
       onChange={e => {
-        handler(e.target.name, e.target.value);
+        handler(e.target.name, +e.target.value);
       }}
     />
   );

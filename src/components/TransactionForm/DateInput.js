@@ -1,7 +1,7 @@
 /** @jsx createElement */
 /** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
-import { getHTMLDate } from '../utils';
+import { createElement } from '../../framework/element';
+import { getHTMLDate } from '../../utils';
 
 export default function DateInput({ value, handler }) {
   return (

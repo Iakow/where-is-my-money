@@ -7,7 +7,7 @@ import { connectFirebase } from '../data/rest.js';
 import Main from '../components/Main';
 import List from '../components/List';
 
-import TransactionForm from '../components/TransactionForm';
+import TransactionForm from './TransactionForm/TransactionForm';
 import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../data/rest';
 import styles from '../style.css';
 
@@ -15,9 +15,7 @@ export default function App() {
   const [userDataIsLoaded, setIsLoaded] = useState(false);
   const [userData, setUserData] = useState({});
   const [formIsOpen, setFormIsOpen] = useState(false);
-  const [formData, setFormData] = useState(null);
   const [currentTransactionID, setCurrentTransactionID] = useState(null);
-  window.currentTransactionID = currentTransactionID;
 
   useEffect(
     () => {
@@ -33,6 +31,17 @@ export default function App() {
 
   function formHandler(data) {
     setFormIsOpen(false);
+
+    if (!data) {
+      //just close
+    } else {
+      if (currentTransactionID) {
+        //update
+        setCurrentTransactionID(null);
+      } else {
+        //add new'
+      }
+    }
 
     /* const { sum, date, category, comment, moneyWay } = data;
 
@@ -72,15 +81,14 @@ export default function App() {
         <Main
           balance={userData.balance}
           openForm={() => {
-            setFormData(null);
             setFormIsOpen(true);
           }}
         />
 
         <List
-          balance={userData.balance} // dont
           transactions={userData.transactions}
-          categories={userData.categories} // ??? чтобы узнать категорию... нне
+          // TODO can i not use whole categories here?
+          categories={userData.categories}
           openForm={id => {
             setCurrentTransactionID(id);
             setFormIsOpen(true);
@@ -90,15 +98,10 @@ export default function App() {
 
         {formIsOpen ? (
           <TransactionForm
-            handler={formHandler}
-            balance={userData.balance} // don`t
+            // TODO what if currentTransactionID == null?
             transaction={userData.transactions[currentTransactionID]} // initialData!
             categories={userData.categories}
-            closeForm={() => {
-              setFormIsOpen(false);
-              setCurrentTransactionID(null);
-            }}
-            setUserData={setUserData} // don`t
+            returnData={formHandler}
           />
         ) : null}
       </div>
