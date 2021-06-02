@@ -6,17 +6,15 @@ export const current = {
   hookIndex: null,
 };
 
-window.current = current;
-
 export function createFunctionElement(tag, props, children) {
-  tag.hooks = tag.hooks || [];
-
   current.wipComponent = tag;
   current.hookIndex = 0;
-  // current.wipComponent.hooks = current.wipComponent.hooks || [];
+  current.wipComponent.hooks = current.wipComponent.hooks || [];
 
   return tag({ ...props, children }, children);
 }
+
+// window.current = current;
 
 export function useState(initial) {
   const { wipComponent, hookIndex } = current;
@@ -29,9 +27,11 @@ export function useState(initial) {
   const actions = oldHook ? oldHook.queue : [];
 
   actions.forEach(action => {
+    // 2. но вот это не срабатывает, массив пустой
     hook.state = isFunction(action) ? action(hook.state) : action;
   });
 
+  // 1. экшн в hook.queue вроде пушится
   const setState = action => {
     current.shouldReRender = true;
     hook.queue.push(action);
@@ -49,6 +49,8 @@ export function useEffect(effect, deps) {
 
   const hasChanged = hasDepsChanged(oldDeps, deps);
 
+  current.hookIndex++;
+
   if (!hasChanged) return;
 
   if (oldHook && oldHook.unmount) {
@@ -61,8 +63,6 @@ export function useEffect(effect, deps) {
   };
 
   window.addEventListener('beforeunload', wipComponent.hooks[hookIndex].unmount);
-
-  current.hookIndex++;
 }
 
 const hasDepsChanged = (prevDeps, nextDeps) =>

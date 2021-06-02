@@ -41,7 +41,7 @@ export default function TransactionForm({ transaction, categories, returnData })
       onsubmit={e => {
         e.preventDefault();
         returnData(data);
-        TransactionForm.hooks = [];
+        // TransactionForm.hooks = [];
       }}
     >
       <Sum value={Math.abs(data.sum)} handler={updateData} />
@@ -72,8 +72,8 @@ export default function TransactionForm({ transaction, categories, returnData })
         type="button"
         class="cancel"
         onclick={() => {
-          TransactionForm.hooks = [];
-          returnData(null);
+          // TransactionForm.hooks = [];
+          returnData();
         }}
       >
         cancel

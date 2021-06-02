@@ -17,6 +17,9 @@ export default function App() {
   const [formIsOpen, setFormIsOpen] = useState(false);
   const [currentTransactionID, setCurrentTransactionID] = useState(null);
 
+  // временный флаг, чтобы проще отслеживать примитив в стейте вместо userData
+  const [flag, setFlag] = useState('');
+
   useEffect(
     () => {
       connectFirebase(data => {
@@ -32,45 +35,29 @@ export default function App() {
   function formHandler(data) {
     setFormIsOpen(false);
 
-    if (!data) {
-      //just close
-    } else {
+    if (data) {
+      const newBalance = userData.balance + data.sum;
+
       if (currentTransactionID) {
-        //update
-        setCurrentTransactionID(null);
+        editTransaction(currentTransactionID, data)
+          .then(() => setBalance(newBalance))
+          .then(() => getUserDB())
+          .then(data => {
+            setUserData(data);
+            setCurrentTransactionID(null);
+          });
       } else {
-        //add new'
+        setFlag('loading');
+
+        addNewTransaction(data)
+          .then(() => setBalance(newBalance))
+          .then(() => getUserDB())
+          .then(() => {
+            setFlag('ok');
+            setUserData(data);
+          });
       }
     }
-
-    /* const { sum, date, category, comment, moneyWay } = data;
-
-    const newTransaction = {
-      sum: moneyWay.value == 'income' ? +sum : -sum,
-      date: new Date(date.value).getTime(),
-      category: +category.value,
-      comment: comment.value,
-    };
-
-    const newBalance = balance + newTransaction.sum - initialSum;
-
-    if (data) {
-      if (id) {
-        editTransaction(id, newTransaction)
-          .then(() => setBalance(newBalance))
-          .then(() => getUserDB())
-          .then(data => {
-            setUserData(data);
-          });
-      } else {
-        addNewTransaction(newTransaction)
-          .then(() => setBalance(newBalance))
-          .then(() => getUserDB())
-          .then(data => {
-            setUserData(data);
-          });
-      }
-    } */
   }
 
   if (!userDataIsLoaded) {
@@ -78,6 +65,7 @@ export default function App() {
   } else {
     return (
       <div class={styles['app-container']}>
+        <p>{flag}</p>
         <Main
           balance={userData.balance}
           openForm={() => {
@@ -87,7 +75,6 @@ export default function App() {
 
         <List
           transactions={userData.transactions}
-          // TODO can i not use whole categories here?
           categories={userData.categories}
           openForm={id => {
             setCurrentTransactionID(id);
@@ -98,8 +85,7 @@ export default function App() {
 
         {formIsOpen ? (
           <TransactionForm
-            // TODO what if currentTransactionID == null?
-            transaction={userData.transactions[currentTransactionID]} // initialData!
+            transaction={userData.transactions[currentTransactionID]}
             categories={userData.categories}
             returnData={formHandler}
           />
@@ -108,3 +94,5 @@ export default function App() {
     );
   }
 }
+
+window.App = App;

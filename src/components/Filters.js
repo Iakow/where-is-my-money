@@ -33,7 +33,7 @@ export default function Filters({ value, setFilters }) {
   }
 
   const SortBySum = ({ value }) => (
-    <>
+    <div>
       sortBySum
       <label>
         <input type="radio" name="sortBySum" value="0" checked={value === 0} />
@@ -47,11 +47,11 @@ export default function Filters({ value, setFilters }) {
         <input type="radio" name="sortBySum" value="-1" checked={value === -1} />
         Down
       </label>
-    </>
+    </div>
   );
 
   const SortByDate = ({ value }) => (
-    <>
+    <div>
       sortByDate
       <label>
         <input type="radio" name="sortByDate" value="0" checked={value === 0} />
@@ -65,11 +65,11 @@ export default function Filters({ value, setFilters }) {
         <input type="radio" name="sortByDate" value="-1" checked={value === -1} />
         Down
       </label>
-    </>
+    </div>
   );
 
   const FilterMoneyway = ({ value }) => (
-    <>
+    <div>
       filterMoneyway
       <label>
         <input type="radio" name="filterMoneyway" value="0" checked={value === 0} />
@@ -83,7 +83,7 @@ export default function Filters({ value, setFilters }) {
         <input type="radio" name="filterMoneyway" value="-1" checked={value === -1} />
         Outcome
       </label>
-    </>
+    </div>
   );
 
   const DateFilter = ({ value }) => {
@@ -94,10 +94,10 @@ export default function Filters({ value, setFilters }) {
     }
 
     return (
-      <>
+      <div>
         <DateInput value={value.firstDate} name="firstDate" />
         <DateInput value={value.lastDate} name="lastDate" />
-      </>
+      </div>
     );
   };
 

@@ -9,7 +9,7 @@ import Filters from '../components/Filters';
 import { removeTransaction, setBalance, getUserDB } from '../data/rest';
 
 export default function List({ setUserData, transactions, balance, categories, openForm }) {
-  //lastDate конфюзит, когда добавляется новая транзакция.
+  //TODO: lastDate конфюзит, когда добавляется новая транзакция.
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
     sortBySum: 0,
@@ -80,14 +80,14 @@ export default function List({ setUserData, transactions, balance, categories, o
   });
 
   return (
-    <>
+    <div>
       <ul class={styles.list}>
         {ListItems}
         <li>sum: {totalSum}</li>
       </ul>
 
       <Filters value={filters} setFilters={setFilters} />
-    </>
+    </div>
   );
 
   function deleteTransaction(e) {
