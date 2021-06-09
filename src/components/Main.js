@@ -1,15 +1,14 @@
-/** @jsx createElement */
-/** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
+import React from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '../style';
 
 export default function Main({ balance, openForm }) {
   return (
-    <div class={styles.main}>
+    <div className={styles.main}>
       <span>BALANCE: {balance}</span>
 
-      <button class={styles['btn-add']} onClick={openForm}>
+      <button className={styles['btn-add']} onClick={openForm}>
         +
       </button>
     </div>

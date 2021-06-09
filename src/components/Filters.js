@@ -1,50 +1,50 @@
-/** @jsx createElement */
-/** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
+import React from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '../style';
 import { getHTMLDate } from '../utils';
 
-export default function Filters({ value, setFilters }) {
-  function handler({ target }) {
+export default function Filters({ value, handler }) {
+  /* function handler({ target }) {
     if (target.name == 'sortBySum') {
-      setFilters(filters => {
+      returnValue(filters => {
         filters.sortBySum = +target.value;
         filters.sortByDate = 0;
         return filters;
       });
+      console.log(value)
     } else if (target.name == 'sortByDate') {
-      setFilters(filters => {
+      returnValue(filters => {
         filters.sortByDate = +target.value;
         filters.sortBySum = 0;
         return filters;
       });
     } else if (target.name == 'filterMoneyway') {
-      setFilters(filters => {
+      returnValue(filters => {
         filters.filterMoneyway = +target.value;
         return filters;
       });
     } else if (target.name == 'firstDate' || target.name == 'lastDate') {
-      setFilters(filters => {
+      returnValue(filters => {
         filters.filterDate[target.name] = new Date(target.value).getTime();
         return filters;
       });
     }
-  }
+  } */
 
-  const SortBySum = ({ value }) => (
+  const SortBySum = ({ value, handler }) => (
     <div>
       sortBySum
       <label>
-        <input type="radio" name="sortBySum" value="0" checked={value === 0} />
+        <input type="radio" name="sortBySum" value="0" checked={value === 0} onChange={handler} />
         Off
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="1" checked={value === 1} />
+        <input type="radio" name="sortBySum" value="1" checked={value === 1} onChange={handler} />
         Up
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="-1" checked={value === -1} />
+        <input type="radio" name="sortBySum" value="-1" checked={value === -1} onChange={handler} />
         Down
       </label>
     </div>
@@ -54,15 +54,15 @@ export default function Filters({ value, setFilters }) {
     <div>
       sortByDate
       <label>
-        <input type="radio" name="sortByDate" value="0" checked={value === 0} />
+        <input type="radio" name="sortByDate" defaultValue="0" defaultChecked={value === 0} />
         Off
       </label>
       <label>
-        <input type="radio" name="sortByDate" value="1" checked={value === 1} />
+        <input type="radio" name="sortByDate" defaultValue="1" defaultChecked={value === 1} />
         Up
       </label>
       <label>
-        <input type="radio" name="sortByDate" value="-1" checked={value === -1} />
+        <input type="radio" name="sortByDate" defaultValue="-1" defaultChecked={value === -1} />
         Down
       </label>
     </div>
@@ -72,15 +72,15 @@ export default function Filters({ value, setFilters }) {
     <div>
       filterMoneyway
       <label>
-        <input type="radio" name="filterMoneyway" value="0" checked={value === 0} />
+        <input type="radio" name="filterMoneyway" defaultValue="0" defaultChecked={value === 0} />
         All
       </label>
       <label>
-        <input type="radio" name="filterMoneyway" value="1" checked={value === 1} />
+        <input type="radio" name="filterMoneyway" defaultValue="1" defaultChecked={value === 1} />
         Income
       </label>
       <label>
-        <input type="radio" name="filterMoneyway" value="-1" checked={value === -1} />
+        <input type="radio" name="filterMoneyway" defaultValue="-1" defaultChecked={value === -1} />
         Outcome
       </label>
     </div>
@@ -89,7 +89,12 @@ export default function Filters({ value, setFilters }) {
   const DateFilter = ({ value }) => {
     function DateInput({ value, name }) {
       return (
-        <input name={name} type="datetime-local" placeholder="date" value={getHTMLDate(value)} />
+        <input
+          name={name}
+          type="datetime-local"
+          placeholder="date"
+          defaultValue={getHTMLDate(value)}
+        />
       );
     }
 
@@ -102,14 +107,127 @@ export default function Filters({ value, setFilters }) {
   };
 
   return (
-    <div onchange={handler}>
-      <SortBySum value={value.sortBySum} />
+    <div>
+      <div>
+        sortBySum
+        <label>
+          <input
+            type="radio"
+            name="sortBySum"
+            value="0"
+            defaultChecked={value.sortBySum === 0}
+            onChange={handler}
+          />
+          Off
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="sortBySum"
+            value="1"
+            defaultChecked={value === 1}
+            onChange={handler}
+          />
+          Up
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="sortBySum"
+            value="-1"
+            defaultChecked={value === -1}
+            onChange={handler}
+          />
+          Down
+        </label>
+      </div>
+
       <br />
-      <SortByDate value={value.sortByDate} />
+      <div>
+        sortByDate
+        <label>
+          <input
+            type="radio"
+            name="sortByDate"
+            value="0"
+            defaultChecked={value.sortByDate === 0}
+            onChange={handler}
+          />
+          Off
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="sortByDate"
+            value="1"
+            defaultChecked={value.sortByDate === 1}
+            onChange={handler}
+          />
+          Up
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="sortByDate"
+            value="-1"
+            defaultChecked={value.sortByDate === -1}
+            onChange={handler}
+          />
+          Down
+        </label>
+      </div>
+      {/* <SortByDate value={value.sortByDate} /> */}
       <br />
-      <FilterMoneyway value={value.filterMoneyway} />
+      <div>
+        filterMoneyway
+        <label>
+          <input
+            type="radio"
+            name="filterMoneyway"
+            value="0"
+            defaultChecked={value.filterMoneyway === 0}
+            onChange={handler}
+          />
+          All
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="filterMoneyway"
+            value="1"
+            defaultChecked={value.filterMoneyway === 1}
+            onChange={handler}
+          />
+          Income
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="filterMoneyway"
+            value="-1"
+            defaultChecked={value.filterMoneyway === -1}
+            onChange={handler}
+          />
+          Outcome
+        </label>
+      </div>
+      {/* <FilterMoneyway value={value.filterMoneyway} /> */}
       <br />
-      <DateFilter value={value.filterDate} />
+      <input
+        name="firstDate"
+        type="datetime-local"
+        placeholder="date"
+        defaultValue={getHTMLDate(value.filterDate.firstDate)}
+        onChange={handler}
+      />
+      <input
+        name="lastDate"
+        type="datetime-local"
+        placeholder="date"
+        defaultValue={getHTMLDate(value.filterDate.lastDate)}
+        onChange={handler}
+      />
+      {/* <DateFilter value={value.filterDate} /> */}
     </div>
   );
 }

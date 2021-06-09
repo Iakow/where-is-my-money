@@ -1,9 +1,7 @@
-/** @jsx createElement */
-/*** @jsxFrag createFragment */
-import { createElement, createFragment } from '../../framework/element';
+import React from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '../../style';
-import { useState } from '../../framework/hooks';
 
 import Sum from './Sum';
 import Category from './Category';
@@ -15,50 +13,79 @@ export default function TransactionForm({ transaction, categories, returnData })
   // TODO don`t show single zero in sum
   // TODO: what about initial category?
 
-  const initialTransactionValues = {
-    comment: '',
-    category: 0,
-    sum: 0,
-    date: Date.now(),
-  };
+  // TODO: переписать как-то изящнее?
+  const initialTransactionValues = transaction
+    ? { ...transaction }
+    : {
+        comment: '',
+        category: 0,
+        sum: 0,
+        date: Date.now(),
+      };
 
-  const [data, setData] = useState(transaction || initialTransactionValues);
+  const [data, setData] = useState(initialTransactionValues);
   const [isIncome, setIsIncome] = useState(
     transaction ? (transaction.sum > 0 ? true : false) : false,
   );
-
+  
   const updateData = (name, value) => {
     setData(data => {
-      if (name == 'sum') value = isIncome ? +value : -value;
+      if (name == 'sum') value = isIncome === true ? +value : -value; // а если ноль?
+      console.log(data);
       data[name] = value;
       return data;
     });
   };
 
+  const toggleMoneyWay = ({ target }) => {
+    setIsIncome(target.value === 'income' ? true : false);
+    console.log(data)
+    console.log(isIncome)
+
+    if (data.sum !== 0) {
+      setData(data => {
+        data.sum *= -1;
+        data.category = 0;
+        return data;
+      });
+    }
+  };
+
   return (
     <form
-      class={styles.form}
-      onsubmit={e => {
+      className={styles.form}
+      onSubmit={e => {
         e.preventDefault();
         returnData(data);
-        // TransactionForm.hooks = [];
       }}
     >
-      <Sum value={Math.abs(data.sum)} handler={updateData} />
+      <Sum value={Math.abs(data.sum)} returnData={updateData} />
 
       <DateInput value={data.date} handler={updateData} />
 
-      <ToogleMoneyWay
-        value={isIncome}
-        handler={value => {
-          setIsIncome(value);
-          setData(data => {
-            data.sum *= -1;
-            data.category = 0;
-            return data;
-          });
-        }}
-      />
+      <div>
+        <label>
+          <input
+            type="radio"
+            name="moneyWay"
+            value="income"
+            checked={isIncome}
+            onChange={toggleMoneyWay}
+          />
+          income
+        </label>
+
+        <label>
+          <input
+            type="radio"
+            name="moneyWay"
+            value="outcome"
+            checked={!isIncome}
+            onChange={toggleMoneyWay}
+          />
+          outcome
+        </label>
+      </div>
 
       <Category
         value={data.category}
@@ -70,16 +97,15 @@ export default function TransactionForm({ transaction, categories, returnData })
 
       <button
         type="button"
-        class="cancel"
-        onclick={() => {
-          // TransactionForm.hooks = [];
+        className="cancel"
+        onClick={() => {
           returnData();
         }}
       >
         cancel
       </button>
 
-      <input class="add" type="submit" value="add" />
+      <input className="add" type="submit" value="add" />
     </form>
   );
 }

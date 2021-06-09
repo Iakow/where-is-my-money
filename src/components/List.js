@@ -1,15 +1,23 @@
-/** @jsx createElement */
-/** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
-import { useEffect, useState } from '../framework/hooks';
+import React from 'react';
+import { useEffect, useState } from 'react';
 
 import styles from '../style';
 import { getDateString } from '../utils';
 import Filters from '../components/Filters';
 import { removeTransaction, setBalance, getUserDB } from '../data/rest';
 
-export default function List({ setUserData, transactions, balance, categories, openForm }) {
+export default function List({
+  setUserData,
+  transactions,
+  balance,
+  categories,
+  openForm,
+  deleteTransaction,
+}) {
   //TODO: lastDate конфюзит, когда добавляется новая транзакция.
+
+  const [selectedTransactions, setSelectedTransactions] = useState([]);
+
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
     sortBySum: 0,
@@ -20,11 +28,34 @@ export default function List({ setUserData, transactions, balance, categories, o
     },
   });
 
+  useEffect(() => {
+    setSelectedTransactions(Object.entries({ ...transactions }));
+  }, [transactions]);
+
   let totalSum = 0;
 
-  function getFilteredTransactions(transactions) {
-    let filteredTransactions = Object.entries(transactions);
+  function handleInputs({ target }) {
+    const newFilterState = { ...filters };
+    if (target.name == 'sortBySum') {
+      newFilterState.sortBySum = +target.value;
+      newFilterState.sortByDate = 0;
+    } else if (target.name == 'sortByDate') {
+      newFilterState.sortByDate = +target.value;
+      newFilterState.sortBySum = 0;
+    } else if (target.name == 'filterMoneyway') {
+      newFilterState.filterMoneyway = +target.value;
+    } else if (target.name == 'firstDate' || target.name == 'lastDate') {
+      newFilterState.filterDate[target.name] = new Date(target.value).getTime();
+    }
 
+    setFilters(newFilterState);
+    selectTransactions(newFilterState);
+  }
+
+  function selectTransactions(filters) {
+    let filteredTransactions = Object.entries({ ...transactions });
+
+    // TODO: надо как-то иначе установить дефолты
     filteredTransactions = filteredTransactions.filter(
       transaction =>
         transaction[1].date >= filters.filterDate.firstDate &&
@@ -44,66 +75,48 @@ export default function List({ setUserData, transactions, balance, categories, o
       filteredTransactions.sort((a, b) => filters.sortBySum * (b[1].sum - a[1].sum));
     }
 
-    return filteredTransactions;
+    setSelectedTransactions(filteredTransactions);
   }
 
-  const ListItems = getFilteredTransactions(transactions).map(transaction => {
-    const { date, category, comment, sum } = transaction[1];
-    const id = transaction[0];
-    const categoryGroup = sum < 0 ? 'outcome' : 'income';
-    totalSum += sum;
-    const color = { outcome: 'red', income: 'green' };
-
-    return (
-      <li id={id} class={styles['list-item']}>
-        <span style="width:30%">{getDateString(date)}</span>
-        <span class={styles[color[categoryGroup]]} style="width:15%">
-          {sum}
-        </span>
-        <span>{categories[categoryGroup][category]}</span>
-        <span style="width:25%">{comment}</span>
-
-        <button
-          class={styles['btn-edit']}
-          onclick={e => {
-            openForm(e.target.parentElement.id);
-          }}
-        >
-          🖉
-        </button>
-
-        <button class={styles['btn-delete']} onclick={deleteTransaction}>
-          X
-        </button>
-      </li>
-    );
-  });
-
   return (
-    <div>
-      <ul class={styles.list}>
-        {ListItems}
+    <>
+      <ul className={styles.list}>
+        {selectedTransactions.map(transaction => {
+          const { date, category, comment, sum } = transaction[1];
+          const id = transaction[0];
+          const categoryGroup = sum < 0 ? 'outcome' : 'income';
+          totalSum += sum;
+          const color = { outcome: 'red', income: 'green' };
+
+          return (
+            <li key={id} id={id} className={styles['list-item']}>
+              <span>{getDateString(date)}</span>
+              <span className={styles[color[categoryGroup]]}>{sum}</span>
+              <span>{categories[categoryGroup][category]}</span>
+              <span>{comment}</span>
+
+              <button
+                className={styles['btn-edit']}
+                onClick={e => {
+                  openForm(e.target.parentElement.id);
+                }}
+              >
+                🖉
+              </button>
+
+              <button
+                className={styles['btn-delete']}
+                onClick={e => deleteTransaction(e.target.parentElement.id)}
+              >
+                X
+              </button>
+            </li>
+          );
+        })}
         <li>sum: {totalSum}</li>
       </ul>
 
-      <Filters value={filters} setFilters={setFilters} />
-    </div>
+      <Filters value={filters} handler={handleInputs} />
+    </>
   );
-
-  function deleteTransaction(e) {
-    const id = e.target.parentElement.id;
-    const newBalance = balance - transactions[id].sum;
-
-    removeTransaction(id)
-      .then(() => setBalance(newBalance))
-      .then(() => getUserDB())
-      .then(data => {
-        const { balance, categories } = data;
-        const transactions = Object.entries(data.transactions).map(([key, value]) => ({
-          id: key,
-          ...value,
-        }));
-        setUserData({ balance, categories, transactions });
-      });
-  }
 }

@@ -106,31 +106,42 @@ export async function getTransactions() {
   dataStore.userData.transactions = result;
 }
 
-export async function addNewTransaction(transaction) {
-  let response = await fetch(
+export function addNewTransaction(transaction) {
+  return fetch(
     `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'POST',
       body: JSON.stringify(transaction),
     },
-  );
-
-  let result = await response.json();
-
-  getTransactions();
+  ).then(response => {
+    return response.json();
+  });
 }
 
-export async function setBalance(balance) {
-  let response = await fetch(
+// надо бы PATH
+export function editTransaction(id, data) {
+  return fetch(
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions/${id}.json?auth=${dataStore.auth.TOKEN}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    },
+  ).then(response => {
+    return response.json();
+  });
+}
+
+export function setBalance(balance) {
+  return fetch(
     `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/balance.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'PUT',
       body: JSON.stringify(balance),
     },
-  );
-
-  let result = await response.json();
+  ).then(response => response.json());
 }
+
+window.setBalance = setBalance;
 
 export async function getBalance() {
   let response = await fetch(
@@ -152,38 +163,28 @@ export async function getCategories() {
   dataStore.userData.categories = result;
 }
 
-export async function getUserDB() {
-  let response = await fetch(
+export function getUserDB() {
+  return fetch(
     `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}.json?auth=${dataStore.auth.TOKEN}`,
-  );
-
-  let result = await response.json();
-
-  return result;
+  )
+    .then(response => {
+      return response.json();
+    })
+    .then(data => {
+      return data;
+    })
+    .catch(error => console.warn(error));
 }
 
-export async function removeTransaction(id) {
-  let response = await fetch(
+export function removeTransaction(id) {
+  return fetch(
     `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions/${id}.json?auth=${dataStore.auth.TOKEN}`,
     {
       method: 'DELETE',
     },
-  );
-
-  let result = await response.json();
-}
-
-// надо бы PATH
-export async function editTransaction(id, data) {
-  let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}/transactions/${id}.json?auth=${dataStore.auth.TOKEN}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    },
-  );
-
-  let result = await response.json();
+  ).then(response => {
+    response.json();
+  });
 }
 
 window.signout = signout;

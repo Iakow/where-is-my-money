@@ -1,20 +1,20 @@
-/** @jsx createElement */
-/** @jsxFrag createFragment */
-import { createElement, createFragment } from '../../framework/element';
+import React, { useState } from 'react';
 
-export default function Sum({ value, handler }) {
+export default function Sum({ value, returnData }) {
+  const upData = ({ target }) => {
+    returnData('sum', +target.value);
+  };
+
   return (
     <input
       type="number"
       placeholder="sum"
-      autofocus
+      autoFocus
       name="sum"
       min="1"
-      value={value === 0 ? '' : value}
+      defaultValue={value === 0 ? '' : value}
       required
-      onChange={e => {
-        handler(e.target.name, +e.target.value);
-      }}
+      onChange={upData}
     />
   );
 }

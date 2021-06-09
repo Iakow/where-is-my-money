@@ -1,4 +1,5 @@
-import renderApp from './framework/render';
+import React from 'react';
+import { render } from 'react-dom';
 import App from './components/App';
 
-renderApp(App, document.getElementById('app'));
+render(<App/>, document.getElementById('app'));

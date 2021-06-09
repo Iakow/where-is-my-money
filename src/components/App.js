@@ -1,14 +1,18 @@
-/** @jsx createElement */
-/*** @jsxFrag createFragment */
-import { createElement, createFragment } from '../framework/element';
-import { useEffect, useState, useRef, current } from '../framework/hooks';
+import React from 'react';
+import { useEffect, useState } from 'react';
 import { connectFirebase } from '../data/rest.js';
 
 import Main from '../components/Main';
 import List from '../components/List';
 
 import TransactionForm from './TransactionForm/TransactionForm';
-import { editTransaction, setBalance, getUserDB, addNewTransaction } from '../data/rest';
+import {
+  editTransaction,
+  setBalance,
+  getUserDB,
+  addNewTransaction,
+  removeTransaction,
+} from '../data/rest';
 import styles from '../style.css';
 
 export default function App() {
@@ -16,9 +20,6 @@ export default function App() {
   const [userData, setUserData] = useState({});
   const [formIsOpen, setFormIsOpen] = useState(false);
   const [currentTransactionID, setCurrentTransactionID] = useState(null);
-
-  // временный флаг, чтобы проще отслеживать примитив в стейте вместо userData
-  const [flag, setFlag] = useState('');
 
   useEffect(
     () => {
@@ -36,36 +37,44 @@ export default function App() {
     setFormIsOpen(false);
 
     if (data) {
-      const newBalance = userData.balance + data.sum;
-
       if (currentTransactionID) {
+        const newBalance =
+          userData.balance - userData.transactions[currentTransactionID].sum + data.sum;
         editTransaction(currentTransactionID, data)
           .then(() => setBalance(newBalance))
           .then(() => getUserDB())
-          .then(data => {
-            setUserData(data);
+          .then(newData => {
             setCurrentTransactionID(null);
+            console.log(newData);
+            setUserData(newData);
           });
       } else {
-        setFlag('loading');
-
         addNewTransaction(data)
-          .then(() => setBalance(newBalance))
+          .then(() => setBalance(userData.balance + data.sum))
           .then(() => getUserDB())
-          .then(() => {
-            setFlag('ok');
-            setUserData(data);
+          .then(newData => {
+            console.log(newData);
+            setUserData(newData);
           });
       }
+    } else {
+      setCurrentTransactionID(null);
     }
+  }
+
+  function deleteTransaction(id) {
+    const newBalance = userData.balance - userData.transactions[id].sum;
+    removeTransaction(id)
+      .then(() => setBalance(newBalance))
+      .then(() => getUserDB())
+      .then(data => setUserData(data));
   }
 
   if (!userDataIsLoaded) {
     return <h1>Loading...</h1>;
   } else {
     return (
-      <div class={styles['app-container']}>
-        <p>{flag}</p>
+      <div className={styles['app-container']}>
         <Main
           balance={userData.balance}
           openForm={() => {
@@ -80,8 +89,11 @@ export default function App() {
             setCurrentTransactionID(id);
             setFormIsOpen(true);
           }}
+          deleteTransaction={deleteTransaction}
           setUserData={setUserData}
         />
+
+        {/* {Object.values(userData.transactions).map(item => <p>{item.sum}</p>)} */}
 
         {formIsOpen ? (
           <TransactionForm

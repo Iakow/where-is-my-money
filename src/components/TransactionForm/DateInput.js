@@ -1,18 +1,25 @@
-/** @jsx createElement */
-/** @jsxFrag createFragment */
-import { createElement } from '../../framework/element';
+import React, { useState } from 'react';
 import { getHTMLDate } from '../../utils';
 
 export default function DateInput({ value, handler }) {
+  const [date, setDate] = useState(value);
+
+  const handleInput = ({ target }) => {
+    setDate(new Date(target.value).getTime());
+  };
+
+  const upData = ()=> {
+    handler('date', date)
+  }
+
   return (
     <input
       name="date"
       type="datetime-local"
       placeholder="date"
-      value={getHTMLDate(value)}
-      onInput={e => {
-        handler(e.target.name, new Date(e.target.value).getTime());
-      }}
+      value={getHTMLDate(date)}
+      onChange={handleInput}
+      onBlur={upData}
     />
   );
 }
