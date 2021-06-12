@@ -1,5 +1,7 @@
 # where-is-my-money
 
+[Demo](https://iakow.github.io/where-is-my-money/)
+
 Study project within the front-end course from Kottans
 
 The application is designed to track income & expenses. It should help you better control expenses, plan a budget and, possibly, get insights from statistics. It should answer questions like:
