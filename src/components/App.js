@@ -5,7 +5,6 @@ import { connectFirebase } from '../data/rest.js';
 import Main from '../components/Main';
 import List from '../components/List';
 import Auth from '../components/Auth';
-import Sum from '../components/TransactionForm/Sum';
 
 import TransactionForm from './TransactionForm/TransactionForm';
 import {
@@ -83,11 +82,14 @@ export default function App() {
   if (userData.balance === 0)
     return (
       <form
+        className={styles.initialForm}
         onSubmit={e => {
           e.preventDefault();
           setBalance(+e.target.sum.value).then(setUserData);
         }}
       >
+        <span>First, set your current balance please</span>
+        <br />
         <input type="number" placeholder="sum" autoFocus name="sum" min="1" required />
         <input type="submit" />
       </form>
