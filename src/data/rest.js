@@ -1,6 +1,6 @@
 import dataStore from '../data/dataStore';
 
-export function connectFirebase(handleData) {
+export function connectFirebase(userDataCb, authCb) {
   const firebaseConfig = {
     apiKey: 'AIzaSyBwtSg-c3xYVJkNSDA49afwTxu6rA2JBDI',
     authDomain: 'kottans-app.firebaseapp.com',
@@ -13,7 +13,6 @@ export function connectFirebase(handleData) {
   };
 
   firebase.initializeApp(firebaseConfig);
-  signin('ponomarykov@gmail.com', '135790');
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
@@ -23,76 +22,95 @@ export function connectFirebase(handleData) {
         .getIdToken()
         .then(token => (dataStore.auth.TOKEN = token))
         .then(() => getUserDB())
-        .then(data => handleData(data))
+        .then(data => {
+          if (data === null) {
+            return initializeUserDB();
+          } else {
+            return data; // тут надо спросить про баланс
+          }
+        })
+        .then(data => userDataCb(data))
         .catch(error => {
           throw error;
         });
     } else {
-      /* acondsole.log('need login'); */
+      authCb();
     }
   });
 }
 
-async function initializeUserDB(uid) {
+function initializeUserDB() {
+  debugger;
   let userDB = {
-    transactions: '',
-    balance: '',
+    transactions: 0,
+    balance: 0,
     categories: {
       outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
       income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
     },
   };
 
-  let response = await fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${uid}.json?auth=${TOKEN}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(userDB),
-    },
-  );
-
-  let result = await response.json();
+  return new Promise((resolve, reject) => {
+    fetch(
+      `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}.json?auth=${dataStore.auth.TOKEN}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(userDB),
+      },
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        resolve(data);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
 }
 
-function signout() {
+export function signout() {
   firebase.auth().signOut();
 }
 
-function signin(email = 'ponomarykov@gmail.com') {
+export function signin(email, password, successСb, failureCb) {
   firebase
     .auth()
-    .signInWithEmailAndPassword(email, '135790')
+    .signInWithEmailAndPassword(email, password)
     .then(userCredential => {
-      var user = userCredential.user;
-    })
-    .catch(error => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-    });
-}
-
-export function register(mail) {
-  firebase
-    .auth()
-    .createUserWithEmailAndPassword(mail, '135790')
-    .then(userCredential => {
-      var user = userCredential.user;
-      dataStore.auth.UID = user.uid;
-
+      let user = userCredential.user;
       return user;
     })
     .then(user => {
+      if (successСb) successСb();
+    })
+    .catch(error => {
+      if (failureCb) failureCb(error);
+    });
+}
+
+export function register(mail, password, csuccessСb, failureCb) {
+  firebase
+    .auth()
+    .createUserWithEmailAndPassword(mail, password)
+    .then(userCredential => {
+      var user = userCredential.user;
+      dataStore.auth.UID = user.uid;
+      return user;
+    })
+    /* .then(user => {
       return user.getIdToken();
     })
     .then(token => {
       dataStore.auth.TOKEN = token;
     })
-    .then(() => {
+    .then(user => {
       initializeUserDB(dataStore.auth.UID);
     })
+    .then(user => csuccessСb()) */
     .catch(error => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
+      failureCb(error);
     });
 }
 
@@ -138,7 +156,9 @@ export function setBalance(balance) {
       method: 'PUT',
       body: JSON.stringify(balance),
     },
-  ).then(response => response.json());
+  )
+    .then(response => response.json())
+    .then(() => getUserDB());
 }
 
 window.setBalance = setBalance;
@@ -164,16 +184,20 @@ export async function getCategories() {
 }
 
 export function getUserDB() {
-  return fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}.json?auth=${dataStore.auth.TOKEN}`,
-  )
-    .then(response => {
-      return response.json();
-    })
-    .then(data => {
-      return data;
-    })
-    .catch(error => console.warn(error));
+  return new Promise((resolve, reject) => {
+    fetch(
+      `https://kottans-app-default-rtdb.firebaseio.com/users/${dataStore.auth.UID}.json?auth=${dataStore.auth.TOKEN}`,
+    )
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        resolve(data);
+      })
+      .catch(error => {
+        reject(error);
+      });
+  });
 }
 
 export function removeTransaction(id) {
@@ -188,3 +212,4 @@ export function removeTransaction(id) {
 }
 
 window.signout = signout;
+window.signin = signin;

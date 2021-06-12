@@ -6,8 +6,9 @@ import { getHTMLDate } from '../utils';
 
 export default function Filters({ value, handler }) {
   const SortBySum = ({ value, handler }) => (
-    <div>
-      sortBySum
+    <div className={styles.filters_item}>
+      Sort by sum
+      <br />
       <label>
         <input type="radio" name="sortBySum" value="0" checked={value === 0} onChange={handler} />
         Off
@@ -24,8 +25,9 @@ export default function Filters({ value, handler }) {
   );
 
   const SortByDate = ({ value, handler }) => (
-    <div>
-      sortByDate
+    <div className={styles.filters_item}>
+      Sort by date
+      <br />
       <label>
         <input
           type="radio"
@@ -60,8 +62,9 @@ export default function Filters({ value, handler }) {
   );
 
   const FilterMoneyway = ({ value, handler }) => (
-    <div>
-      filterMoneyway
+    <div className={styles.filters_item}>
+      Filter by money way
+      <br />
       <label>
         <input
           type="radio"
@@ -97,7 +100,8 @@ export default function Filters({ value, handler }) {
 
   const DateFilter = ({ value, handler }) => {
     return (
-      <div>
+      <div className={styles.filters_item}>
+        Filter by time period
         <input
           name="firstDate"
           type="datetime-local"
@@ -117,13 +121,10 @@ export default function Filters({ value, handler }) {
   };
 
   return (
-    <div>
+    <div className={styles.filters}>
       <SortBySum value={value.sortBySum} handler={handler} />
-      <br />
       <SortByDate value={value.sortByDate} handler={handler} />
-      <br />
       <FilterMoneyway value={value.filterMoneyway} handler={handler} />
-      <br />
       <DateFilter value={value.filterDate} handler={handler} />
     </div>
   );

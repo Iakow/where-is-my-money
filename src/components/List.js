@@ -89,31 +89,36 @@ export default function List({
           const color = { outcome: 'red', income: 'green' };
 
           return (
-            <li key={id} id={id} className={styles['list-item']}>
-              <span>{getDateString(date)}</span>
-              <span className={styles[color[categoryGroup]]}>{sum}</span>
-              <span>{categories[categoryGroup][category]}</span>
-              <span>{comment}</span>
+            <li key={id} id={id} className={styles['list_item']}>
+              <span className={styles.list_item_date}>{getDateString(date)}</span>
+              <span className={`${styles.list_item_sum} ${styles[color[categoryGroup]]}`}>
+                {sum}
+              </span>
+              <span className={styles.list_item_category}>
+                {categories[categoryGroup][category]}
+              </span>
+              <span className={styles.list_item_comment}>{comment}</span>
+              <span className={styles.list_item_btns}>
+                <button
+                  className={styles.list_item_edit}
+                  onClick={e => {
+                    openForm(e.target.parentElement.parentElement.id);
+                  }}
+                >
+                  🖉
+                </button>
 
-              <button
-                className={styles['btn-edit']}
-                onClick={e => {
-                  openForm(e.target.parentElement.id);
-                }}
-              >
-                🖉
-              </button>
-
-              <button
-                className={styles['btn-delete']}
-                onClick={e => deleteTransaction(e.target.parentElement.id)}
-              >
-                X
-              </button>
+                <button
+                  className={styles.list_item_delete}
+                  onClick={e => deleteTransaction(e.target.parentElement.parentElement.id)}
+                >
+                  X
+                </button>
+              </span>
             </li>
           );
         })}
-        <li>sum: {totalSum}</li>
+        <li>Total: {totalSum}</li>
       </ul>
 
       <Filters value={filters} handler={handleInputs} />

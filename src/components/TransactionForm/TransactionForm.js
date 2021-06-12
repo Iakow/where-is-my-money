@@ -27,11 +27,11 @@ export default function TransactionForm({ transaction, categories, returnData })
   const [isIncome, setIsIncome] = useState(
     transaction ? (transaction.sum > 0 ? true : false) : false,
   );
-  
+
   const updateData = (name, value) => {
     setData(data => {
       if (name == 'sum') value = isIncome === true ? +value : -value; // а если ноль?
-      console.log(data);
+
       data[name] = value;
       return data;
     });
@@ -39,8 +39,6 @@ export default function TransactionForm({ transaction, categories, returnData })
 
   const toggleMoneyWay = ({ target }) => {
     setIsIncome(target.value === 'income' ? true : false);
-    console.log(data)
-    console.log(isIncome)
 
     if (data.sum !== 0) {
       setData(data => {

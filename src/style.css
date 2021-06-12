@@ -1,23 +1,86 @@
+.auth {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.auth_form {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo_bth {
+  height: 40px;
+  width: 80px;
+  background-color: orange;
+}
+
+header {
+  grid-area: header;
+  height: 50px;
+}
+
 .main {
   display: flex;
   justify-content: space-between;
   font-size: 48px;
+  grid-area: main;
 }
 
 .app-container {
+  display: grid;
+  grid-gap: 10px;
+  grid-template-areas: 'header header' 'none main' 'filters list';
+  grid-template-columns: 250px 1fr;
   font-family: Arial, Helvetica, sans-serif;
   /* margin: 0 200px; */
   position: relative;
 }
 
 .list {
-  margin: 30px 0;
-  padding: 0;
+  padding: 5px;
+  border: 1px solid rgb(212, 212, 212);
+  list-style-type: none;
+  margin: 0;
+  grid-area: list;
 }
 
-.list-item {
+.list_item {
+  height: 30px;
   display: flex;
   justify-content: space-between;
+  padding: 10px 0;
+}
+
+.list_item_date {
+  width: 25%;
+}
+
+.list_item_sum {
+  width: 10%;
+}
+
+.list_item_category {
+  width: 10%;
+}
+
+.list_item_comment {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 10%;
+  font-size: 12px;
+}
+
+.filters {
+  padding: 5px;
+  border: 1px solid rgb(212, 212, 212);
+  grid-area: filters;
+  font-size: 12px;
+}
+
+.filters_item {
   padding: 10px 0;
 }
 
@@ -31,13 +94,14 @@
   left: 0;
 }
 
-.btn-edit {
+.list_item_edit {
+  width: 40px;
   background-color: transparent;
   border: none;
   font-size: 20px;
 }
 
-.btn-edit:hover {
+.list_item_edit:hover {
   background-color: rgb(194, 194, 194);
   cursor: pointer;
 }
@@ -63,13 +127,14 @@
   color: green;
 }
 
-.btn-delete {
+.list_item_delete {
+  width: 40px;
   color: red;
   border: none;
   background-color: transparent;
 }
 
-.btn-delete:hover {
+.list_item_delete:hover {
   background-color: rgb(194, 194, 194);
   cursor: pointer;
 }
