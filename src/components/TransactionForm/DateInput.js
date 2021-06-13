@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getHTMLDate } from '../../utils';
+import styles from '../../style';
 
 export default function DateInput({ value, handler }) {
   const [date, setDate] = useState(value);
@@ -8,12 +9,13 @@ export default function DateInput({ value, handler }) {
     setDate(new Date(target.value).getTime());
   };
 
-  const upData = ()=> {
-    handler('date', date)
-  }
+  const upData = () => {
+    handler('date', date);
+  };
 
   return (
     <input
+      className={styles['transaction-form_input']}
       name="date"
       type="datetime-local"
       placeholder="date"

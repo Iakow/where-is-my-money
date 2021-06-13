@@ -50,60 +50,66 @@ export default function TransactionForm({ transaction, categories, returnData })
   };
 
   return (
-    <form
-      className={styles.form}
-      onSubmit={e => {
-        e.preventDefault();
-        returnData(data);
-      }}
-    >
-      <Sum value={Math.abs(data.sum)} returnData={updateData} />
-
-      <DateInput value={data.date} handler={updateData} />
-
-      <div>
-        <label>
-          <input
-            type="radio"
-            name="moneyWay"
-            value="income"
-            checked={isIncome}
-            onChange={toggleMoneyWay}
-          />
-          income
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="moneyWay"
-            value="outcome"
-            checked={!isIncome}
-            onChange={toggleMoneyWay}
-          />
-          outcome
-        </label>
-      </div>
-
-      <Category
-        value={data.category}
-        categories={isIncome ? categories.income : categories.outcome}
-        handler={updateData}
-      />
-
-      <Comment value={data.comment} handler={updateData} />
-
-      <button
-        type="button"
-        className="cancel"
-        onClick={() => {
-          returnData();
+    <div className={styles['transaction-form_container']}>
+      <form
+        className={styles['transaction-form']}
+        onSubmit={e => {
+          e.preventDefault();
+          returnData(data);
         }}
       >
-        cancel
-      </button>
+        <Sum value={Math.abs(data.sum)} returnData={updateData} />
 
-      <input className="add" type="submit" value="add" />
-    </form>
+        <DateInput value={data.date} handler={updateData} />
+
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="moneyWay"
+              value="income"
+              checked={isIncome}
+              onChange={toggleMoneyWay}
+            />
+            income
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              name="moneyWay"
+              value="outcome"
+              checked={!isIncome}
+              onChange={toggleMoneyWay}
+            />
+            outcome
+          </label>
+        </div>
+
+        <Category
+          value={data.category}
+          categories={isIncome ? categories.income : categories.outcome}
+          handler={updateData}
+        />
+
+        <Comment value={data.comment} handler={updateData} />
+
+        <input
+          className={`${styles['transaction-form_input']} ${styles['btn']}`}
+          type="submit"
+          value="add"
+        />
+
+        <button
+          type="button"
+          className={`${styles['transaction-form_input']} ${styles['btn']}`}
+          onClick={() => {
+            returnData();
+          }}
+        >
+          cancel
+        </button>
+      </form>
+    </div>
   );
 }

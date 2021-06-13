@@ -98,6 +98,7 @@ export default function List({
                 {categories[categoryGroup][category]}
               </span>
               <span className={styles.list_item_comment}>{comment}</span>
+
               <span className={styles.list_item_btns}>
                 <button
                   className={styles.list_item_edit}
@@ -118,10 +119,9 @@ export default function List({
             </li>
           );
         })}
-        <li>Total: {totalSum}</li>
       </ul>
 
-      <Filters value={filters} handler={handleInputs} />
+      <Filters value={filters} handler={handleInputs} totalSelectedSum={totalSum} />
     </>
   );
 }

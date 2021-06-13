@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import styles from '../../style';
 
 export default function Sum({ value, returnData }) {
   const upData = ({ target }) => {
@@ -7,6 +8,7 @@ export default function Sum({ value, returnData }) {
 
   return (
     <input
+      className={styles['transaction-form_input']}
       type="number"
       placeholder="sum"
       autoFocus

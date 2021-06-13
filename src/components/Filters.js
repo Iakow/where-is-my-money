@@ -1,10 +1,9 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
 
 import styles from '../style';
 import { getHTMLDate } from '../utils';
 
-export default function Filters({ value, handler }) {
+export default function Filters({ value, handler, totalSelectedSum }) {
   const SortBySum = ({ value, handler }) => (
     <div className={styles.filters_item}>
       Sort by sum
@@ -126,6 +125,8 @@ export default function Filters({ value, handler }) {
       <SortByDate value={value.sortByDate} handler={handler} />
       <FilterMoneyway value={value.filterMoneyway} handler={handler} />
       <DateFilter value={value.filterDate} handler={handler} />
+
+      <p className={styles['filters_total-sum']}>Sample sum: {totalSelectedSum}</p>
     </div>
   );
 }

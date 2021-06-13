@@ -41,25 +41,30 @@ export default function Auth({ setIsAuth }) {
 
   return (
     <div className={styles.auth}>
+      <h1>Where is my money?</h1>
+      <p>Simple app for keeping track of your income and expenses</p>
       <form className={styles.auth_form} onSubmit={authType === 'signin' ? signinIn : registrate}>
         <div>
-          <label>
-            <input type="radio" name="signin" checked={authType === 'signin'} onChange={toogle} />
-            sign_in
-          </label>
+          <div className={styles.auth_form_labels}>
+            <label>
+              <input type="radio" name="signin" checked={authType === 'signin'} onChange={toogle} />
+              Sign In
+            </label>
 
-          <label>
-            <input
-              type="radio"
-              name="registrate"
-              checked={authType === 'registrate'}
-              onChange={toogle}
-            />
-            sign_up
-          </label>
+            <label>
+              <input
+                type="radio"
+                name="registrate"
+                checked={authType === 'registrate'}
+                onChange={toogle}
+              />
+              Sign Up
+            </label>
+          </div>
         </div>
 
         <input
+          className={styles.auth_form_input}
           type="email"
           name="email"
           value={email}
@@ -72,6 +77,7 @@ export default function Auth({ setIsAuth }) {
         <br />
 
         <input
+          className={styles.auth_form_input}
           type="password"
           name="password"
           value={password}
@@ -83,7 +89,11 @@ export default function Auth({ setIsAuth }) {
 
         <br />
 
-        <input type="submit" value={authType === 'signin' ? 'Sign In' : 'Register Me'} />
+        <input
+          className={styles.auth_form_submit}
+          type="submit"
+          value={authType === 'signin' ? 'Sign In' : 'Register Me'}
+        />
 
         <br />
       </form>

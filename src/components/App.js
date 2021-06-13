@@ -75,7 +75,7 @@ export default function App() {
       .then(data => setUserData(data));
   }
 
-  if (isResponseWaiting) return <h1>Loading...</h1>;
+  if (isResponseWaiting) return <div className={styles.loading}>Loading...</div>;
 
   if (isAuth === false) return <Auth setIsAuth={setIsAuth} />;
 
@@ -88,10 +88,19 @@ export default function App() {
           setBalance(+e.target.sum.value).then(setUserData);
         }}
       >
-        <span>First, set your current balance please</span>
-        <br />
-        <input type="number" placeholder="sum" autoFocus name="sum" min="1" required />
-        <input type="submit" />
+        {' '}
+        <p className={styles['initialForm_auth-message']}>Registration completed successfully!</p>
+        <p className={styles['initialForm_input-message']}>Now, set your current balance please</p>
+        <input
+          className={styles['initialForm_input']}
+          type="number"
+          placeholder="sum"
+          autoFocus
+          name="sum"
+          min="1"
+          required
+        />
+        <input className={styles['initialForm_submit']} type="submit" value="Send" />
       </form>
     );
 
