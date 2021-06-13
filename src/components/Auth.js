@@ -29,9 +29,14 @@ export default function Auth({ setIsAuth }) {
 
   const registrate = e => {
     e.preventDefault();
-    register(email, password, () => {
-      setIsAuth(true);
-    });
+    register(
+      email,
+      password,
+      () => {
+        setIsAuth(true);
+      },
+      error => alert(error.message),
+    );
   };
 
   return (
