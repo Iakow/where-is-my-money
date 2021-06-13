@@ -1,5 +1,5 @@
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import styles from '../../style';
 
@@ -7,13 +7,8 @@ import Sum from './Sum';
 import Category from './Category';
 import DateInput from './DateInput';
 import Comment from './Comment';
-import ToogleMoneyWay from './ToggleMoneyWay';
 
 export default function TransactionForm({ transaction, categories, returnData }) {
-  // TODO don`t show single zero in sum
-  // TODO: what about initial category?
-
-  // TODO: переписать как-то изящнее?
   const initialTransactionValues = transaction
     ? { ...transaction }
     : {
@@ -30,8 +25,7 @@ export default function TransactionForm({ transaction, categories, returnData })
 
   const updateData = (name, value) => {
     setData(data => {
-      if (name == 'sum') value = isIncome === true ? +value : -value; // а если ноль?
-
+      if (name == 'sum') value = isIncome === true ? +value : -value;
       data[name] = value;
       return data;
     });

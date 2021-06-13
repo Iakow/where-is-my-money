@@ -87,7 +87,7 @@ export function signin(email, password, successСb, failureCb) {
     });
 }
 
-export function register(mail, password, csuccessСb, failureCb) {
+export function register(mail, password, failureCb) {
   firebase
     .auth()
     .createUserWithEmailAndPassword(mail, password)

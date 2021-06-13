@@ -4,18 +4,8 @@ import { useEffect, useState } from 'react';
 import styles from '../style';
 import { getDateString } from '../utils';
 import Filters from '../components/Filters';
-import { removeTransaction, setBalance, getUserDB } from '../data/rest';
 
-export default function List({
-  setUserData,
-  transactions,
-  balance,
-  categories,
-  openForm,
-  deleteTransaction,
-}) {
-  //TODO: lastDate конфюзит, когда добавляется новая транзакция.
-
+export default function List({ transactions, categories, openForm, deleteTransaction }) {
   const [selectedTransactions, setSelectedTransactions] = useState([]);
 
   const [filters, setFilters] = useState({
@@ -55,7 +45,6 @@ export default function List({
   function selectTransactions(filters) {
     let filteredTransactions = Object.entries({ ...transactions });
 
-    // TODO: надо как-то иначе установить дефолты
     filteredTransactions = filteredTransactions.filter(
       transaction =>
         transaction[1].date >= filters.filterDate.firstDate &&
