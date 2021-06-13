@@ -136,7 +136,7 @@ export default function App() {
       />
       {formIsOpen ? (
         <TransactionForm
-          transaction={userData.transactions[currentTransactionID]}
+          transaction={currentTransactionID ? userData.transactions[currentTransactionID] : null}
           categories={userData.categories}
           returnData={formHandler}
         />
