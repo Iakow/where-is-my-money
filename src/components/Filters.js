@@ -1,37 +1,62 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import styles from '../style';
 import { getHTMLDate } from '../utils';
 
-export default function Filters({ value, handler, totalSelectedSum }) {
+export default function Filters({ value, upFilterState, totalSelectedSum }) {
   const upPureValue = ({ target }) => {
-    handler(target.name, +target.value);
+    upFilterState(target.name, +target.value);
   };
 
   const upDateValue = ({ target }) => {
-    handler(target.name, new Date(target.value).getTime());
+    const newValue = { ...value.filterDate };
+    if (target.type === 'checkbox') {
+      newValue[target.name].isEnabled = !newValue[target.name].isEnabled;
+    } else {
+      newValue[target.name].dateValue = new Date(target.value).getTime();
+    }
+
+    upFilterState('filterDate', newValue);
   };
 
-  const SortBySum = ({ value, handler }) => (
+  const SortBySum = ({ value }) => (
     <div className={styles.filters_item}>
       Sort by sum
       <br />
       <label>
-        <input type="radio" name="sortBySum" value="0" checked={value === 0} onChange={handler} />
+        <input
+          type="radio"
+          name="sortBySum"
+          value="0"
+          checked={value === 0}
+          onChange={upPureValue}
+        />
         Off
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="1" checked={value === 1} onChange={handler} />
+        <input
+          type="radio"
+          name="sortBySum"
+          value="1"
+          checked={value === 1}
+          onChange={upPureValue}
+        />
         Up
       </label>
       <label>
-        <input type="radio" name="sortBySum" value="-1" checked={value === -1} onChange={handler} />
+        <input
+          type="radio"
+          name="sortBySum"
+          value="-1"
+          checked={value === -1}
+          onChange={upPureValue}
+        />
         Down
       </label>
     </div>
   );
 
-  const SortByDate = ({ value, handler }) => (
+  const SortByDate = ({ value }) => (
     <div className={styles.filters_item}>
       Sort by date
       <br />
@@ -41,7 +66,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="sortByDate"
           defaultValue="0"
           defaultChecked={value === 0}
-          onChange={handler}
+          onChange={upPureValue}
         />
         Off
       </label>
@@ -51,7 +76,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="sortByDate"
           defaultValue="1"
           defaultChecked={value === 1}
-          onChange={handler}
+          onChange={upPureValue}
         />
         Up
       </label>
@@ -61,14 +86,14 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="sortByDate"
           defaultValue="-1"
           defaultChecked={value === -1}
-          onChange={handler}
+          onChange={upPureValue}
         />
         Down
       </label>
     </div>
   );
 
-  const FilterMoneyway = ({ value, handler }) => (
+  const FilterMoneyway = ({ value }) => (
     <div className={styles.filters_item}>
       Filter by money way
       <br />
@@ -78,7 +103,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="filterMoneyway"
           defaultValue="0"
           defaultChecked={value === 0}
-          onChange={handler}
+          onChange={upPureValue}
         />
         All
       </label>
@@ -88,7 +113,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="filterMoneyway"
           defaultValue="1"
           defaultChecked={value === 1}
-          onChange={handler}
+          onChange={upPureValue}
         />
         Income
       </label>
@@ -98,7 +123,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="filterMoneyway"
           defaultValue="-1"
           defaultChecked={value === -1}
-          onChange={handler}
+          onChange={upPureValue}
         />
         Outcome
       </label>
@@ -106,17 +131,6 @@ export default function Filters({ value, handler, totalSelectedSum }) {
   );
 
   const DateFilter = ({ value }) => {
-    const handle = ({ target }) => {
-      const newValue = { ...value };
-      if (target.type === 'checkbox') {
-        newValue[target.name].isEnabled = !newValue[target.name].isEnabled;
-        handler('filterDate', newValue);
-      } else {
-        newValue[target.name].dateValue = new Date(target.value).getTime();
-        handler('filterDate', newValue);
-      }
-    };
-
     return (
       <div className={styles.filters_item}>
         Filter by time period
@@ -125,7 +139,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           name="firstDate"
           type="checkbox"
           checked={value.firstDate.isEnabled}
-          onChange={handle}
+          onChange={upDateValue}
         />
         <input
           name="firstDate"
@@ -133,14 +147,14 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           disabled={!value.firstDate.isEnabled}
           placeholder="date"
           defaultValue={getHTMLDate(value.firstDate.dateValue)}
-          onChange={handle}
+          onChange={upDateValue}
         />
         <br />
         <input
           name="lastDate"
           type="checkbox"
           checked={value.lastDate.isEnabled}
-          onChange={handle}
+          onChange={upDateValue}
         />
         <input
           name="lastDate"
@@ -148,7 +162,7 @@ export default function Filters({ value, handler, totalSelectedSum }) {
           disabled={!value.lastDate.isEnabled}
           placeholder="date"
           defaultValue={getHTMLDate(value.lastDate.dateValue)}
-          onChange={handle}
+          onChange={upDateValue}
         />
       </div>
     );
@@ -156,10 +170,10 @@ export default function Filters({ value, handler, totalSelectedSum }) {
 
   return (
     <div className={styles.filters}>
-      <SortBySum value={value.sortBySum} handler={upPureValue} />
-      <SortByDate value={value.sortByDate} handler={upPureValue} />
-      <FilterMoneyway value={value.filterMoneyway} handler={upPureValue} />
-      <DateFilter value={value.filterDate} handler={upPureValue} />
+      <SortBySum value={value.sortBySum} />
+      <SortByDate value={value.sortByDate} />
+      <FilterMoneyway value={value.filterMoneyway} />
+      <DateFilter value={value.filterDate} />
 
       <p className={styles['filters_total-sum']}>Sample sum: {totalSelectedSum}</p>
     </div>

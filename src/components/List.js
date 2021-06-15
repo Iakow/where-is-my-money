@@ -19,12 +19,12 @@ export default function List({ transactions, categories, openForm, deleteTransac
   });
 
   useEffect(() => {
-    setFilteredTransactions(Object.entries({ ...transactions }));
+    filterTransactions(filters);
   }, [transactions]);
 
   let totalSum = 0;
 
-  function handleFilters2(name, value) {
+  function handleFilterControlls(name, value) {
     const newFilterState = { ...filters };
 
     if (name == 'sortBySum') {
@@ -49,26 +49,6 @@ export default function List({ transactions, categories, openForm, deleteTransac
     filterTransactions(newFilterState);
   }
 
-  function handleFilters({ target }) {
-    //придется переделать хендлер? Ну а как иначе запретить фильтрацию? Заводить еще какой-то стейт здесь?
-    const newFilterState = { ...filters };
-
-    if (target.name == 'sortBySum') {
-      newFilterState.sortBySum = +target.value;
-      newFilterState.sortByDate = 0;
-    } else if (target.name == 'sortByDate') {
-      newFilterState.sortByDate = +target.value;
-      newFilterState.sortBySum = 0;
-    } else if (target.name == 'filterMoneyway') {
-      newFilterState.filterMoneyway = +target.value;
-    } else if (target.name == 'firstDate' || target.name == 'lastDate') {
-      newFilterState.filterDate[target.name] = new Date(target.value).getTime();
-    }
-
-    setFilters(newFilterState);
-    filterTransactions(newFilterState);
-  }
-
   function filterTransactions(filters) {
     let filteredTransactions = Object.entries({ ...transactions });
 
@@ -84,16 +64,16 @@ export default function List({ transactions, categories, openForm, deleteTransac
       );
     }
 
-    if (filters.filterMoneyway != 0) {
+    if (filters.filterMoneyway !== 0) {
       filteredTransactions = filteredTransactions.filter(
         transaction => filters.filterMoneyway * transaction[1].sum > 0,
       );
     }
 
-    if (filters.sortByDate != 0) {
+    if (filters.sortByDate !== 0) {
       filteredTransactions.sort((a, b) => filters.sortByDate * (b[1].date - a[1].date));
     }
-    if (filters.sortBySum != 0) {
+    if (filters.sortBySum !== 0) {
       filteredTransactions.sort((a, b) => filters.sortBySum * (b[1].sum - a[1].sum));
     }
 
@@ -143,7 +123,7 @@ export default function List({ transactions, categories, openForm, deleteTransac
         })}
       </ul>
 
-      <Filters value={filters} handler={handleFilters2} totalSelectedSum={totalSum} />
+      <Filters value={filters} upFilterState={handleFilterControlls} totalSelectedSum={totalSum} />
     </>
   );
 }
