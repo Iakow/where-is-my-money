@@ -1,9 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import styles from '../style';
 import { getHTMLDate } from '../utils';
 
 export default function Filters({ value, handler, totalSelectedSum }) {
+  const upPureValue = ({ target }) => {
+    handler(target.name, +target.value);
+  };
+
+  const upDateValue = ({ target }) => {
+    handler(target.name, new Date(target.value).getTime());
+  };
+
   const SortBySum = ({ value, handler }) => (
     <div className={styles.filters_item}>
       Sort by sum
@@ -97,23 +105,50 @@ export default function Filters({ value, handler, totalSelectedSum }) {
     </div>
   );
 
-  const DateFilter = ({ value, handler }) => {
+  const DateFilter = ({ value }) => {
+    const handle = ({ target }) => {
+      const newValue = { ...value };
+      if (target.type === 'checkbox') {
+        newValue[target.name].isEnabled = !newValue[target.name].isEnabled;
+        handler('filterDate', newValue);
+      } else {
+        newValue[target.name].dateValue = new Date(target.value).getTime();
+        handler('filterDate', newValue);
+      }
+    };
+
     return (
       <div className={styles.filters_item}>
         Filter by time period
+        <br />
+        <input
+          name="firstDate"
+          type="checkbox"
+          checked={value.firstDate.isEnabled}
+          onChange={handle}
+        />
         <input
           name="firstDate"
           type="datetime-local"
+          disabled={!value.firstDate.isEnabled}
           placeholder="date"
-          defaultValue={getHTMLDate(value.firstDate)}
-          onChange={handler}
+          defaultValue={getHTMLDate(value.firstDate.dateValue)}
+          onChange={handle}
+        />
+        <br />
+        <input
+          name="lastDate"
+          type="checkbox"
+          checked={value.lastDate.isEnabled}
+          onChange={handle}
         />
         <input
           name="lastDate"
           type="datetime-local"
+          disabled={!value.lastDate.isEnabled}
           placeholder="date"
-          defaultValue={getHTMLDate(value.lastDate)}
-          onChange={handler}
+          defaultValue={getHTMLDate(value.lastDate.dateValue)}
+          onChange={handle}
         />
       </div>
     );
@@ -121,10 +156,10 @@ export default function Filters({ value, handler, totalSelectedSum }) {
 
   return (
     <div className={styles.filters}>
-      <SortBySum value={value.sortBySum} handler={handler} />
-      <SortByDate value={value.sortByDate} handler={handler} />
-      <FilterMoneyway value={value.filterMoneyway} handler={handler} />
-      <DateFilter value={value.filterDate} handler={handler} />
+      <SortBySum value={value.sortBySum} handler={upPureValue} />
+      <SortByDate value={value.sortByDate} handler={upPureValue} />
+      <FilterMoneyway value={value.filterMoneyway} handler={upPureValue} />
+      <DateFilter value={value.filterDate} handler={upPureValue} />
 
       <p className={styles['filters_total-sum']}>Sample sum: {totalSelectedSum}</p>
     </div>

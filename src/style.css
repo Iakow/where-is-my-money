@@ -69,7 +69,7 @@ body {
   display: grid;
   grid-gap: 10px;
   grid-template-areas: 'header header' 'none main' 'filters list';
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: 260px 1fr;
   position: relative;
 }
 
