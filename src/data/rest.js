@@ -42,8 +42,8 @@ export function connectFirebase(userDataCb, authCb) {
 
 function initializeUserDB() {
   let userDB = {
-    transactions: 0,
-    balance: 0,
+    transactions: false,
+    balance: false,
     categories: {
       outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
       income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
@@ -132,9 +132,7 @@ export function setBalance(balance) {
       method: 'PUT',
       body: JSON.stringify(balance),
     },
-  )
-    .then(response => response.json())
-    .then(() => getUserDB());
+  ).then(response => response.json());
 }
 
 export function getUserDB() {

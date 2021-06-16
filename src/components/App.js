@@ -39,7 +39,7 @@ export default function App() {
     );
   }, []);
 
-  function formHandler(data) {
+  function handleTransactionForm(data) {
     setFormIsOpen(false);
 
     if (data) {
@@ -58,9 +58,7 @@ export default function App() {
         addNewTransaction(data)
           .then(() => setBalance(userData.balance + data.sum))
           .then(() => getUserDB())
-          .then(newData => {
-            setUserData(newData);
-          });
+          .then(setUserData);
       }
     } else {
       setCurrentTransactionID(null);
@@ -72,23 +70,25 @@ export default function App() {
     removeTransaction(id)
       .then(() => setBalance(newBalance))
       .then(() => getUserDB())
-      .then(data => setUserData(data));
+      .then(setUserData);
   }
 
   if (isResponseWaiting) return <div className={styles.loading}>Loading...</div>;
 
   if (isAuth === false) return <Auth setIsAuth={setIsAuth} />;
 
-  if (userData.balance === 0)
+  if (userData.balance === false)
     return (
       <form
         className={styles.initialForm}
         onSubmit={e => {
           e.preventDefault();
-          setBalance(+e.target.sum.value).then(setUserData);
+
+          setBalance(+e.target.sum.value)
+            .then(() => getUserDB())
+            .then(setUserData);
         }}
       >
-        {' '}
         <p className={styles['initialForm_auth-message']}>Registration completed successfully!</p>
         <p className={styles['initialForm_input-message']}>Now, set your current balance please</p>
         <input
@@ -138,7 +138,7 @@ export default function App() {
         <TransactionForm
           transaction={currentTransactionID ? userData.transactions[currentTransactionID] : null}
           categories={userData.categories}
-          returnData={formHandler}
+          returnData={handleTransactionForm}
         />
       ) : null}
     </div>

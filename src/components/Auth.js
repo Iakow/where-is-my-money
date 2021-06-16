@@ -90,6 +90,7 @@ export default function Auth({ setIsAuth }) {
 
         <br />
       </form>
+
       <button
         className={styles.demo_bth}
         onClick={() => {
