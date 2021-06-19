@@ -3,14 +3,14 @@ let TOKEN;
 
 export function connectFirebase(userDataCb, authCb) {
   const firebaseConfig = {
-    apiKey: 'AIzaSyBwtSg-c3xYVJkNSDA49afwTxu6rA2JBDI',
-    authDomain: 'kottans-app.firebaseapp.com',
-    databaseURL: 'https://kottans-app-default-rtdb.firebaseio.com',
-    projectId: 'kottans-app',
-    storageBucket: 'kottans-app.appspot.com',
-    messagingSenderId: '558738104058',
-    appId: '1:558738104058:web:096c34066c87562a5df343',
-    measurementId: 'G-MDSKRH794G',
+    apiKey: process.env.apiKey,
+    authDomain: process.env.authDomain,
+    databaseURL: process.env.databaseURL,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
+    measurementId: process.env.measurementId,
   };
 
   firebase.initializeApp(firebaseConfig);
