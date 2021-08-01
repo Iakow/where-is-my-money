@@ -17,22 +17,20 @@ export function connectFirebase(userDataCb, authCb) {
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      UID = user.uid;
-
       user
         .getIdToken()
-        .then(token => (TOKEN = token))
+        .then(token => {
+          TOKEN = token;
+          UID = user.uid;
+        })
         .then(() => getUserDB())
         .then(data => {
-          if (data === null) {
-            return initializeUserDB();
-          } else {
-            return data;
-          }
+          if (data === null) return initializeUserDB();
+          return data;
         })
         .then(data => userDataCb(data))
         .catch(error => {
-          throw error;
+          alert(error);
         });
     } else {
       authCb();
@@ -50,21 +48,10 @@ function initializeUserDB() {
     },
   };
 
-  return new Promise((resolve, reject) => {
-    fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`, {
-      method: 'PUT',
-      body: JSON.stringify(userDB),
-    })
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        resolve(data);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  return fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`, {
+    method: 'PUT',
+    body: JSON.stringify(userDB),
+  }).then(response => response.json());
 }
 
 export function signout() {
@@ -136,18 +123,9 @@ export function setBalance(balance) {
 }
 
 export function getUserDB() {
-  return new Promise((resolve, reject) => {
-    fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        resolve(data);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  return fetch(
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`,
+  ).then(response => response.json());
 }
 
 export function removeTransaction(id) {
@@ -156,7 +134,5 @@ export function removeTransaction(id) {
     {
       method: 'DELETE',
     },
-  ).then(response => {
-    response.json();
-  });
+  ).then(response => response.json());
 }
