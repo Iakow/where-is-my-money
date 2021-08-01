@@ -3,36 +3,34 @@ let TOKEN;
 
 export function connectFirebase(userDataCb, authCb) {
   const firebaseConfig = {
-    apiKey: 'AIzaSyBwtSg-c3xYVJkNSDA49afwTxu6rA2JBDI',
-    authDomain: 'kottans-app.firebaseapp.com',
-    databaseURL: 'https://kottans-app-default-rtdb.firebaseio.com',
-    projectId: 'kottans-app',
-    storageBucket: 'kottans-app.appspot.com',
-    messagingSenderId: '558738104058',
-    appId: '1:558738104058:web:096c34066c87562a5df343',
-    measurementId: 'G-MDSKRH794G',
+    apiKey: process.env.apiKey,
+    authDomain: process.env.authDomain,
+    databaseURL: process.env.databaseURL,
+    projectId: process.env.projectId,
+    storageBucket: process.env.storageBucket,
+    messagingSenderId: process.env.messagingSenderId,
+    appId: process.env.appId,
+    measurementId: process.env.measurementId,
   };
 
   firebase.initializeApp(firebaseConfig);
 
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
-      UID = user.uid;
-
       user
         .getIdToken()
-        .then(token => (TOKEN = token))
+        .then(token => {
+          TOKEN = token;
+          UID = user.uid;
+        })
         .then(() => getUserDB())
         .then(data => {
-          if (data === null) {
-            return initializeUserDB();
-          } else {
-            return data;
-          }
+          if (data === null) return initializeUserDB();
+          return data;
         })
         .then(data => userDataCb(data))
         .catch(error => {
-          throw error;
+          alert(error);
         });
     } else {
       authCb();
@@ -42,29 +40,18 @@ export function connectFirebase(userDataCb, authCb) {
 
 function initializeUserDB() {
   let userDB = {
-    transactions: 0,
-    balance: 0,
+    transactions: false,
+    balance: false,
     categories: {
       outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
       income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
     },
   };
 
-  return new Promise((resolve, reject) => {
-    fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`, {
-      method: 'PUT',
-      body: JSON.stringify(userDB),
-    })
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        resolve(data);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  return fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`, {
+    method: 'PUT',
+    body: JSON.stringify(userDB),
+  }).then(response => response.json());
 }
 
 export function signout() {
@@ -132,24 +119,13 @@ export function setBalance(balance) {
       method: 'PUT',
       body: JSON.stringify(balance),
     },
-  )
-    .then(response => response.json())
-    .then(() => getUserDB());
+  ).then(response => response.json());
 }
 
 export function getUserDB() {
-  return new Promise((resolve, reject) => {
-    fetch(`https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`)
-      .then(response => {
-        return response.json();
-      })
-      .then(data => {
-        resolve(data);
-      })
-      .catch(error => {
-        reject(error);
-      });
-  });
+  return fetch(
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}.json?auth=${TOKEN}`,
+  ).then(response => response.json());
 }
 
 export function removeTransaction(id) {
@@ -158,7 +134,5 @@ export function removeTransaction(id) {
     {
       method: 'DELETE',
     },
-  ).then(response => {
-    response.json();
-  });
+  ).then(response => response.json());
 }

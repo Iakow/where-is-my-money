@@ -29,14 +29,7 @@ export default function Auth({ setIsAuth }) {
 
   const registrate = e => {
     e.preventDefault();
-    register(
-      email,
-      password,
-      () => {
-        setIsAuth(true);
-      },
-      error => alert(error.message),
-    );
+    register(email, password, error => alert(error.message));
   };
 
   return (
@@ -97,6 +90,7 @@ export default function Auth({ setIsAuth }) {
 
         <br />
       </form>
+
       <button
         className={styles.demo_bth}
         onClick={() => {

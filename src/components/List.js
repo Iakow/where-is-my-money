@@ -6,71 +6,84 @@ import { getDateString } from '../utils';
 import Filters from '../components/Filters';
 
 export default function List({ transactions, categories, openForm, deleteTransaction }) {
-  const [selectedTransactions, setSelectedTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
 
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
     sortBySum: 0,
     sortByDate: 1,
     filterDate: {
-      firstDate: 0,
-      lastDate: Date.now(),
+      firstDate: { dateValue: 0, isEnabled: false },
+      lastDate: { dateValue: Date.now(), isEnabled: false },
     },
   });
 
   useEffect(() => {
-    setSelectedTransactions(Object.entries({ ...transactions }));
+    filterTransactions(filters);
   }, [transactions]);
 
   let totalSum = 0;
 
-  function handleInputs({ target }) {
+  function handleFilterControlls(name, value) {
     const newFilterState = { ...filters };
-    if (target.name == 'sortBySum') {
-      newFilterState.sortBySum = +target.value;
+
+    if (name == 'sortBySum') {
+      newFilterState.sortBySum = +value;
       newFilterState.sortByDate = 0;
-    } else if (target.name == 'sortByDate') {
-      newFilterState.sortByDate = +target.value;
+    }
+
+    if (name == 'sortByDate') {
+      newFilterState.sortByDate = +value;
       newFilterState.sortBySum = 0;
-    } else if (target.name == 'filterMoneyway') {
-      newFilterState.filterMoneyway = +target.value;
-    } else if (target.name == 'firstDate' || target.name == 'lastDate') {
-      newFilterState.filterDate[target.name] = new Date(target.value).getTime();
+    }
+
+    if (name == 'filterMoneyway') {
+      newFilterState.filterMoneyway = +value;
+    }
+
+    if (name == 'firstDate' || name == 'lastDate') {
+      newFilterState.filterDate[name] = value;
     }
 
     setFilters(newFilterState);
-    selectTransactions(newFilterState);
+    filterTransactions(newFilterState);
   }
 
-  function selectTransactions(filters) {
+  function filterTransactions(filters) {
     let filteredTransactions = Object.entries({ ...transactions });
 
-    filteredTransactions = filteredTransactions.filter(
-      transaction =>
-        transaction[1].date >= filters.filterDate.firstDate &&
-        transaction[1].date <= filters.filterDate.lastDate,
-    );
+    if (filters.filterDate.firstDate.isEnabled) {
+      filteredTransactions = filteredTransactions.filter(
+        transaction => transaction[1].date >= filters.filterDate.firstDate.dateValue,
+      );
+    }
 
-    if (filters.filterMoneyway != 0) {
+    if (filters.filterDate.lastDate.isEnabled) {
+      filteredTransactions = filteredTransactions.filter(
+        transaction => transaction[1].date <= filters.filterDate.lastDate.dateValue,
+      );
+    }
+
+    if (filters.filterMoneyway !== 0) {
       filteredTransactions = filteredTransactions.filter(
         transaction => filters.filterMoneyway * transaction[1].sum > 0,
       );
     }
 
-    if (filters.sortByDate != 0) {
+    if (filters.sortByDate !== 0) {
       filteredTransactions.sort((a, b) => filters.sortByDate * (b[1].date - a[1].date));
     }
-    if (filters.sortBySum != 0) {
+    if (filters.sortBySum !== 0) {
       filteredTransactions.sort((a, b) => filters.sortBySum * (b[1].sum - a[1].sum));
     }
 
-    setSelectedTransactions(filteredTransactions);
+    setFilteredTransactions(filteredTransactions);
   }
 
   return (
     <>
       <ul className={styles.list}>
-        {selectedTransactions.map(transaction => {
+        {filteredTransactions.map(transaction => {
           const { date, category, comment, sum } = transaction[1];
           const id = transaction[0];
           const categoryGroup = sum < 0 ? 'outcome' : 'income';
@@ -110,7 +123,7 @@ export default function List({ transactions, categories, openForm, deleteTransac
         })}
       </ul>
 
-      <Filters value={filters} handler={handleInputs} totalSelectedSum={totalSum} />
+      <Filters value={filters} upFilterState={handleFilterControlls} totalSelectedSum={totalSum} />
     </>
   );
 }
