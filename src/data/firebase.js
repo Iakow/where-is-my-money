@@ -149,17 +149,13 @@ export function editTransaction(id, data) {
 }
 
 export function setBalance(balance) {
-  return userDBRef
-    .update({
-      balance: balance,
-    })
-    .then(() => {
-      console.log('Document successfully updated!');
-    })
-    .catch(error => {
-      // The document probably doesn't exist.
-      console.error('Error updating document: ', error);
-    });
+  return fetch(
+    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}/balance.json?auth=${TOKEN}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(balance),
+    },
+  ).then(response => response.json());
 }
 
 export function removeTransaction(id) {

@@ -48,7 +48,7 @@ export default function App() {
           userData.balance - userData.transactions[currentTransactionID].sum + data.sum;
 
         editTransaction(currentTransactionID, data)
-          .then(() => setBalance(newBalance))
+          // .then(() => setBalance(newBalance))
           .then(() => getUserDB())
           .then(newData => {
             setCurrentTransactionID(null);
@@ -56,7 +56,7 @@ export default function App() {
           });
       } else {
         addNewTransaction(data)
-          .then(() => setBalance(userData.balance + data.sum))
+          //.then(() => setBalance(userData.balance + data.sum))
           .then(() => getUserDB())
           .then(setUserData);
       }
@@ -68,7 +68,7 @@ export default function App() {
   function deleteTransaction(id) {
     const newBalance = userData.balance - userData.transactions[id].sum;
     removeTransaction(id)
-      .then(() => setBalance(newBalance))
+      // .then(() => setBalance(newBalance))
       .then(() => getUserDB())
       .then(setUserData);
   }
