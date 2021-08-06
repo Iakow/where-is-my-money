@@ -52,8 +52,11 @@ export function getUserDB() {
   function initializeUserDB() {
     // незачем создавать transactions заранее
     const initialUserData = {
-      balance: 0,
-      categories: 'categories',
+      balance: null,
+      categories: {
+        outcome: ['Одежда', 'Транспорт', 'Услуги', 'Здоровье', 'Питание', 'Гигиена', 'Другое'],
+        income: ['Зарплата', 'Фриланс', 'Подарок', 'Другое'],
+      },
       tags: 'tags',
     };
 
@@ -134,7 +137,6 @@ export function addNewTransaction(transaction) {
     });
 }
 
-// надо бы PATH
 export function editTransaction(id, data) {
   return userDBRef
     .collection('transactions')

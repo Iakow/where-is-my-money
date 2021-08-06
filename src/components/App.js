@@ -77,7 +77,7 @@ export default function App() {
 
   if (isAuth === false) return <Auth setIsAuth={setIsAuth} />;
 
-  if (userData.balance === false)
+  if (userData.balance === null)
     return (
       <form
         className={styles.initialForm}
