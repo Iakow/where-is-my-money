@@ -136,15 +136,16 @@ export function addNewTransaction(transaction) {
 
 // надо бы PATH
 export function editTransaction(id, data) {
-  return fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}/transactions/${id}.json?auth=${TOKEN}`,
-    {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    },
-  ).then(response => {
-    return response.json();
-  });
+  return userDBRef
+    .collection('transactions')
+    .doc(id)
+    .set({ ...data })
+    .then(() => {
+      console.log('Document successfully written!');
+    })
+    .catch(error => {
+      console.error('Error writing document: ', error);
+    });
 }
 
 export function setBalance(balance) {

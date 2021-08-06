@@ -48,7 +48,7 @@ export default function App() {
           userData.balance - userData.transactions[currentTransactionID].sum + data.sum;
 
         editTransaction(currentTransactionID, data)
-          .then(() => setBalance(newBalance))
+          // .then(() => setBalance(newBalance))
           .then(() => getUserDB())
           .then(newData => {
             setCurrentTransactionID(null);
