@@ -52,7 +52,6 @@ export function getUserDB() {
   function initializeUserDB() {
     // незачем создавать transactions заранее
     const initialUserData = {
-      transactions: 'must be collection',
       balance: 0,
       categories: 'categories',
       tags: 'tags',
@@ -66,12 +65,41 @@ export function getUserDB() {
       });
   }
 
-  return userDBRef
-    .get()
-    .then(doc => (doc.exists ? doc.data() : initializeUserDB()))
-    .catch(error => {
-      alert('Error getting document:', error);
-    });
+  const getTransactions = () => {
+    return userDBRef
+      .collection('transactions')
+      .get()
+      .then(querySnapshot => {
+        const transactionsObj = {};
+
+        querySnapshot.forEach(doc => {
+          transactionsObj[doc.id] = doc.data();
+        });
+        console.log(transactionsObj);
+        return transactionsObj;
+      });
+  };
+
+  const getAllDB = () => {
+    return userDBRef
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          console.log({ ...doc.data() });
+          return { ...doc.data() };
+        } else {
+          return initializeUserDB();
+        }
+      })
+      .catch(error => {
+        alert('Error getting document:', error);
+      });
+  };
+
+  return Promise.all([getAllDB(), getTransactions()]).then(results => {
+    console.log({ ...results[0], ...{ transactions: results[1] } });
+    return { ...results[0], ...{ transactions: results[1] } };
+  });
 }
 
 export function signout() {

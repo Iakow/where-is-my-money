@@ -124,7 +124,7 @@ export default function App() {
           setFormIsOpen(true);
         }}
       />
-      {/* <List
+      <List
         transactions={userData.transactions}
         categories={userData.categories}
         openForm={id => {
@@ -140,7 +140,7 @@ export default function App() {
           categories={userData.categories}
           returnData={handleTransactionForm}
         />
-      ) : null} */}
+      ) : null}
     </div>
   );
 }
