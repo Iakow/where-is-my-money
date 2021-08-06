@@ -123,15 +123,15 @@ export function signin(email, password, successСb, failureCb) {
 }
 
 export function addNewTransaction(transaction) {
-  return fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}/transactions.json?auth=${TOKEN}`,
-    {
-      method: 'POST',
-      body: JSON.stringify(transaction),
-    },
-  ).then(response => {
-    return response.json();
-  });
+  return userDBRef
+    .collection('transactions')
+    .add({ ...transaction })
+    .then(docRef => {
+      console.log('Document written with ID: ', docRef.id);
+    })
+    .catch(error => {
+      console.error('Error adding document: ', error);
+    });
 }
 
 // надо бы PATH

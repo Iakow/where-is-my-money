@@ -56,7 +56,7 @@ export default function App() {
           });
       } else {
         addNewTransaction(data)
-          .then(() => setBalance(userData.balance + data.sum))
+          //.then(() => setBalance(userData.balance + data.sum))
           .then(() => getUserDB())
           .then(setUserData);
       }
