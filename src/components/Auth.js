@@ -24,12 +24,12 @@ export default function Auth({ setIsAuth }) {
     };
 
     e.preventDefault();
-    signin(email, password, handleSuccess, handleFailure);
+    signin(email, password, handleSuccess, handleFailure); // ???
   };
 
   const registrate = e => {
     e.preventDefault();
-    register(email, password, error => alert(error.message));
+    register(email, password); // ???
   };
 
   return (

@@ -1,6 +1,4 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { connectFirebase } from '../data/rest.js';
+import React, { useEffect, useState } from 'react';
 
 import Main from '../components/Main';
 import List from '../components/List';
@@ -8,13 +6,14 @@ import Auth from '../components/Auth';
 
 import TransactionForm from './TransactionForm/TransactionForm';
 import {
+  connectFirebase,
   signout,
   editTransaction,
   setBalance,
   getUserDB,
   addNewTransaction,
   removeTransaction,
-} from '../data/rest';
+} from '../data/firebase';
 
 import styles from '../style.css';
 
@@ -26,17 +25,18 @@ export default function App() {
   const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
-    connectFirebase(
-      data => {
-        setUserData(data);
-        setIsAuth(true);
-        setIsResponceWaiting(false);
-      },
-      () => {
-        setIsResponceWaiting(false);
-        setIsAuth(false);
-      },
-    );
+    const dataCb = data => {
+      setUserData(data);
+      setIsAuth(true);
+      setIsResponceWaiting(false);
+    };
+
+    const authCb = () => {
+      setIsResponceWaiting(false);
+      setIsAuth(false);
+    };
+
+    connectFirebase(dataCb, authCb);
   }, []);
 
   function handleTransactionForm(data) {
@@ -124,7 +124,7 @@ export default function App() {
           setFormIsOpen(true);
         }}
       />
-      <List
+      {/* <List
         transactions={userData.transactions}
         categories={userData.categories}
         openForm={id => {
@@ -140,7 +140,7 @@ export default function App() {
           categories={userData.categories}
           returnData={handleTransactionForm}
         />
-      ) : null}
+      ) : null} */}
     </div>
   );
 }
