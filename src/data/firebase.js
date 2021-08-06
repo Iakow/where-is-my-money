@@ -159,10 +159,14 @@ export function setBalance(balance) {
 }
 
 export function removeTransaction(id) {
-  return fetch(
-    `https://kottans-app-default-rtdb.firebaseio.com/users/${UID}/transactions/${id}.json?auth=${TOKEN}`,
-    {
-      method: 'DELETE',
-    },
-  ).then(response => response.json());
+  return userDBRef
+    .collection('transactions')
+    .doc(id)
+    .delete()
+    .then(() => {
+      console.log('Document successfully deleted!');
+    })
+    .catch(error => {
+      console.error('Error removing document: ', error);
+    });
 }
