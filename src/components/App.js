@@ -18,20 +18,22 @@ import {
 import styles from '../style.css';
 
 export default function App() {
-  const [isResponseWaiting, setIsResponceWaiting] = useState(true);
+  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // не нравится
   const [userData, setUserData] = useState({});
   const [formIsOpen, setFormIsOpen] = useState(false);
   const [currentTransactionID, setCurrentTransactionID] = useState(null);
-  const [isAuth, setIsAuth] = useState(false);
+  const [isAuth, setIsAuth] = useState(false); // что это вообще?
 
   useEffect(() => {
     const dataCb = data => {
+      // типа, что делать с данными, когда они пришли
       setUserData(data);
       setIsAuth(true);
       setIsResponceWaiting(false);
     };
 
     const authCb = () => {
+      // что делать, если нужна авторизация
       setIsResponceWaiting(false);
       setIsAuth(false);
     };
@@ -56,7 +58,7 @@ export default function App() {
           });
       } else {
         addNewTransaction(data)
-          .then(() => setBalance(userData.balance + data.sum))
+          // .then(() => setBalance(userData.balance + data.sum))
           .then(() => getUserDB())
           .then(setUserData);
       }
