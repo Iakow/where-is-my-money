@@ -1,6 +1,4 @@
-import React from 'react';
-import { useEffect, useState } from 'react';
-import { connectFirebase } from '../data/rest.js';
+import React, { useEffect, useState } from 'react';
 
 import Main from '../components/Main';
 import List from '../components/List';
@@ -8,35 +6,37 @@ import Auth from '../components/Auth';
 
 import TransactionForm from './TransactionForm/TransactionForm';
 import {
+  connectFirebase,
   signout,
   editTransaction,
-  setBalance,
-  getUserDB,
+  initializeUserDB,
   addNewTransaction,
   removeTransaction,
-} from '../data/rest';
+  email,
+} from '../data/firebase';
 
 import styles from '../style.css';
 
 export default function App() {
-  const [isResponseWaiting, setIsResponceWaiting] = useState(true);
-  const [userData, setUserData] = useState({});
+  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // не нравится
+  const [userData, setUserData] = useState(null);
   const [formIsOpen, setFormIsOpen] = useState(false);
   const [currentTransactionID, setCurrentTransactionID] = useState(null);
-  const [isAuth, setIsAuth] = useState(false);
+  const [isAuth, setIsAuth] = useState(false); // что это вообще?
 
   useEffect(() => {
-    connectFirebase(
-      data => {
-        setUserData(data);
-        setIsAuth(true);
-        setIsResponceWaiting(false);
-      },
-      () => {
-        setIsResponceWaiting(false);
-        setIsAuth(false);
-      },
-    );
+    const dataCb = data => {
+      if (data) setUserData(userData => ({ ...userData, ...data }));
+      setIsAuth(true);
+      setIsResponceWaiting(false);
+    };
+
+    const authCb = () => {
+      setIsResponceWaiting(false);
+      setIsAuth(false);
+    };
+
+    connectFirebase(dataCb, authCb);
   }, []);
 
   function handleTransactionForm(data) {
@@ -44,21 +44,11 @@ export default function App() {
 
     if (data) {
       if (currentTransactionID) {
-        const newBalance =
-          userData.balance - userData.transactions[currentTransactionID].sum + data.sum;
-
-        editTransaction(currentTransactionID, data)
-          .then(() => setBalance(newBalance))
-          .then(() => getUserDB())
-          .then(newData => {
-            setCurrentTransactionID(null);
-            setUserData(newData);
-          });
+        editTransaction(currentTransactionID, data).then(() => {
+          setCurrentTransactionID(null);
+        });
       } else {
-        addNewTransaction(data)
-          .then(() => setBalance(userData.balance + data.sum))
-          .then(() => getUserDB())
-          .then(setUserData);
+        addNewTransaction(data);
       }
     } else {
       setCurrentTransactionID(null);
@@ -66,30 +56,24 @@ export default function App() {
   }
 
   function deleteTransaction(id) {
-    const newBalance = userData.balance - userData.transactions[id].sum;
-    removeTransaction(id)
-      .then(() => setBalance(newBalance))
-      .then(() => getUserDB())
-      .then(setUserData);
+    removeTransaction(id);
   }
 
   if (isResponseWaiting) return <div className={styles.loading}>Loading...</div>;
 
   if (isAuth === false) return <Auth setIsAuth={setIsAuth} />;
 
-  if (userData.balance === false)
+  if (userData === null) {
     return (
       <form
         className={styles.initialForm}
         onSubmit={e => {
           e.preventDefault();
 
-          setBalance(+e.target.sum.value)
-            .then(() => getUserDB())
-            .then(setUserData);
+          initializeUserDB(+e.target.sum.value);
         }}
       >
-        <p className={styles['initialForm_auth-message']}>Registration completed successfully!</p>
+        <p className={styles['initialForm_auth-message']}>Wellcome {email}!</p>
         <p className={styles['initialForm_input-message']}>Now, set your current balance please</p>
         <input
           className={styles['initialForm_input']}
@@ -103,15 +87,15 @@ export default function App() {
         <input className={styles['initialForm_submit']} type="submit" value="Send" />
       </form>
     );
+  }
 
   return (
     <div className={styles['app-container']}>
       <header>
         <button
           onClick={e => {
-            setUserData({});
+            setUserData(null);
             signout();
-            setIsAuth(false);
           }}
         >
           signout
@@ -124,6 +108,7 @@ export default function App() {
           setFormIsOpen(true);
         }}
       />
+
       <List
         transactions={userData.transactions}
         categories={userData.categories}
@@ -134,6 +119,7 @@ export default function App() {
         deleteTransaction={deleteTransaction}
         setUserData={setUserData}
       />
+
       {formIsOpen ? (
         <TransactionForm
           transaction={currentTransactionID ? userData.transactions[currentTransactionID] : null}

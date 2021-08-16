@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { signin, register } from '../data/rest';
+import { signin, register } from '../data/firebase';
 
 import styles from '../style';
 
-export default function Auth({ setIsAuth }) {
+export default function Auth() {
   const [authType, setAuthType] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,23 +13,21 @@ export default function Auth({ setIsAuth }) {
   };
 
   const signinIn = e => {
-    const handleFailure = error => {
-      alert(error.message);
+    e.preventDefault();
+
+    signin(email, password).catch(error => {
       setPassword('');
       setEmail('');
-    };
-
-    const handleSuccess = () => {
-      setIsAuth(true);
-    };
-
-    e.preventDefault();
-    signin(email, password, handleSuccess, handleFailure);
+      alert(error.message);
+    });
   };
 
   const registrate = e => {
     e.preventDefault();
-    register(email, password, error => alert(error.message));
+
+    register(email, password).catch(error => {
+      alert(error.message);
+    });
   };
 
   return (

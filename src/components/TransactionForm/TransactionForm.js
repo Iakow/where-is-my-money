@@ -9,6 +9,8 @@ import DateInput from './DateInput';
 import Comment from './Comment';
 
 export default function TransactionForm({ transaction, categories, returnData }) {
+  // нужно вычислить разницу при апдейте и отправлять только ее
+  // в таком случае баланс изменять может и не понадобиться ж
   const initialTransactionValues = transaction
     ? { ...transaction }
     : {
