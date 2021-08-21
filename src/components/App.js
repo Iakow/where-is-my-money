@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import Button from '@material-ui/core/Button';
+
 import Main from '../components/Main';
 import List from '../components/List';
 import Auth from '../components/Auth';
@@ -92,14 +94,17 @@ export default function App() {
   return (
     <div className={styles['app-container']}>
       <header>
-        <button
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
           onClick={e => {
             setUserData(null);
             signout();
           }}
         >
-          signout
-        </button>
+          Sign out
+        </Button>
       </header>
 
       <Main
