@@ -12,14 +12,15 @@ let userDBRef;
 export let email;
 
 export function connectFirebase(userDataCb, authCb) {
-  firebase.initializeApp(firebaseConfig);
-
-  firebase
-    .firestore()
-    .enablePersistence()
-    .catch(err => {
-      console.error(err);
-    });
+  if (firebase.apps.length === 0) {
+    firebase.initializeApp(firebaseConfig);
+    firebase
+      .firestore()
+      .enablePersistence()
+      .catch(err => {
+        console.error(err);
+      });
+  }
 
   firebase.auth().onAuthStateChanged(user => {
     const addDataListeners = () => {
