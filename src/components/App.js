@@ -1,137 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { Toolbar, CircularProgress } from '@material-ui/core';
 
-import Button from '@material-ui/core/Button';
-
-import Main from '../components/Main';
-import List from '../components/List';
-import Auth from '../components/Auth';
-
+import { useFirebase } from '../data/firebase';
+import Auth from './Auth';
 import TransactionForm from './TransactionForm/TransactionForm';
-import {
-  connectFirebase,
-  signout,
-  editTransaction,
-  initializeUserDB,
-  addNewTransaction,
-  removeTransaction,
-  email,
-} from '../data/firebase';
+import Main from './Main';
+import Header from './Header';
+import SetBalanceForm from './SetBalanceForm';
 
-import styles from '../style.css';
+const useStyles = makeStyles(theme => ({
+  loader: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
+  },
+}));
 
 export default function App() {
-  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // не нравится
-  const [userData, setUserData] = useState(null);
-  const [formIsOpen, setFormIsOpen] = useState(false);
-  const [currentTransactionID, setCurrentTransactionID] = useState(null);
-  const [isAuth, setIsAuth] = useState(false); // что это вообще?
+  const classes = useStyles();
 
-  useEffect(() => {
-    const dataCb = data => {
-      if (data) setUserData(userData => ({ ...userData, ...data }));
-      setIsAuth(true);
-      setIsResponceWaiting(false);
-    };
+  const { isResponseWaiting, userData, isAuth } = useFirebase();
+  const [transactionForm, setTransactionForm] = useState({ isOpen: false, transactionID: null });
 
-    const authCb = () => {
-      setIsResponceWaiting(false);
-      setIsAuth(false);
-    };
+  const closeForm = () => {
+    setTransactionForm({ isOpen: false, transactionID: null });
+  };
 
-    connectFirebase(dataCb, authCb);
-  }, []);
+  const openForm = id => {
+    setTransactionForm({ isOpen: true, transactionID: id });
+  };
 
-  function handleTransactionForm(data) {
-    setFormIsOpen(false);
+  if (isResponseWaiting)
+    return (
+      <div className={classes.loader}>
+        <CircularProgress />
+      </div>
+    );
 
-    if (data) {
-      if (currentTransactionID) {
-        editTransaction(currentTransactionID, data).then(() => {
-          setCurrentTransactionID(null);
-        });
-      } else {
-        addNewTransaction(data);
-      }
-    } else {
-      setCurrentTransactionID(null);
-    }
-  }
-
-  function deleteTransaction(id) {
-    removeTransaction(id);
-  }
-
-  if (isResponseWaiting) return <div className={styles.loading}>Loading...</div>;
-
-  if (isAuth === false) return <Auth setIsAuth={setIsAuth} />;
+  if (isAuth === false) return <Auth />;
 
   if (userData === null) {
-    return (
-      <form
-        className={styles.initialForm}
-        onSubmit={e => {
-          e.preventDefault();
-
-          initializeUserDB(+e.target.sum.value);
-        }}
-      >
-        <p className={styles['initialForm_auth-message']}>Wellcome {email}!</p>
-        <p className={styles['initialForm_input-message']}>Now, set your current balance please</p>
-        <input
-          className={styles['initialForm_input']}
-          type="number"
-          placeholder="sum"
-          autoFocus
-          name="sum"
-          min="1"
-          required
-        />
-        <input className={styles['initialForm_submit']} type="submit" value="Send" />
-      </form>
-    );
+    //TODO: try to put it in Auth
+    return <SetBalanceForm />;
   }
 
   return (
-    <div className={styles['app-container']}>
-      <header>
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
-          onClick={e => {
-            setUserData(null);
-            signout();
-          }}
-        >
-          Sign out
-        </Button>
-      </header>
-
-      <Main
-        balance={userData.balance}
-        openForm={() => {
-          setFormIsOpen(true);
-        }}
+    <>
+      <Header balance={userData.balance} openForm={openForm} />
+      <Toolbar /> {/* //? */}
+      <Main userData={userData} openForm={openForm} />
+      <TransactionForm
+        isOpen={transactionForm.isOpen}
+        onClose={closeForm}
+        userData={userData}
+        currentTransactionID={transactionForm.transactionID}
       />
-
-      <List
-        transactions={userData.transactions}
-        categories={userData.categories}
-        openForm={id => {
-          setCurrentTransactionID(id);
-          setFormIsOpen(true);
-        }}
-        deleteTransaction={deleteTransaction}
-        setUserData={setUserData}
-      />
-
-      {formIsOpen ? (
-        <TransactionForm
-          transaction={currentTransactionID ? userData.transactions[currentTransactionID] : null}
-          categories={userData.categories}
-          returnData={handleTransactionForm}
-        />
-      ) : null}
-    </div>
+    </>
   );
 }
