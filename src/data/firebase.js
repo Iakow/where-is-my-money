@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import { useState, useEffect } from 'react';
 
 const firebaseConfig = {
   apiKey: process.env.apiKey,
@@ -11,9 +12,34 @@ const firebaseConfig = {
 let userDBRef;
 export let email;
 
+export function useFirebase() {
+  const [isResponseWaiting, setIsResponceWaiting] = useState(true);
+  const [userData, setUserData] = useState(null);
+  const [isAuth, setIsAuth] = useState(false);
+
+  useEffect(() => {
+    const dataCb = data => {
+      if (data) setUserData(userData => ({ ...userData, ...data }));
+      setIsAuth(true);
+      setIsResponceWaiting(false);
+    };
+
+    const authCb = () => {
+      setUserData(null);
+      setIsResponceWaiting(false);
+      setIsAuth(false);
+    };
+
+    connectFirebase(dataCb, authCb);
+  }, []);
+
+  return { isResponseWaiting, userData, isAuth };
+}
+
 export function connectFirebase(userDataCb, authCb) {
   if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
+
     firebase
       .firestore()
       .enablePersistence()
@@ -25,6 +51,7 @@ export function connectFirebase(userDataCb, authCb) {
   firebase.auth().onAuthStateChanged(user => {
     const addDataListeners = () => {
       userDBRef.onSnapshot(userData => {
+        console.log('listner1');
         if (userData.data()) {
           userDataCb({ ...userData.data() });
         } else {
@@ -33,6 +60,7 @@ export function connectFirebase(userDataCb, authCb) {
       });
 
       userDBRef.collection('transactions').onSnapshot(transactionsSnapshot => {
+        console.log('listner2');
         const transactions = {};
         let balance = null;
 
@@ -55,7 +83,6 @@ export function connectFirebase(userDataCb, authCb) {
     if (user) {
       email = user.email;
       userDBRef = firebase.firestore().collection('users').doc(user.uid);
-
       addDataListeners();
     } else {
       authCb();
