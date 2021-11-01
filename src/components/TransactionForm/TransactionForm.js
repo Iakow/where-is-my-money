@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from 'react';
-
 import AmountInput from './AmountInput';
 import DateInput from './DateInput';
 import MoneyWaySwitch from './MoneyWaySwitch';
 import CategorySelect from './CategorySelect';
 import CommentInput from './CommentInput';
-
 import { editTransaction, addNewTransaction } from '../../data/firebase';
-
 import {
   Dialog,
   DialogActions,
@@ -16,13 +13,12 @@ import {
   DialogTitle,
   Button,
 } from '@material-ui/core';
-
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   root: {
     '& .MuiTextField-root': {
-      margin: theme.spacing(2),
+      marginBottom: theme.spacing(3),
       /* width: '25ch', */
     },
   },
@@ -37,9 +33,11 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
     category: '',
     comment: '',
   };
+
   const transaction = userData.transactions
     ? userData.transactions[currentTransactionID]
     : initialFormValue;
+
   const categories = userData.categories;
 
   const [data, setData] = useState(
@@ -49,6 +47,8 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   const [isIncome, setIsIncome] = useState(
     transaction ? (transaction.sum > 0 ? true : false) : false,
   );
+
+  const [error, setError] = useState({ sum: false, category: false });
 
   useEffect(() => {
     if (currentTransactionID) {
@@ -60,21 +60,23 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   const handleInput = (name, value) => {
     setData(data => {
       const newData = { ...data };
+
       if (name == 'sum') value = isIncome === true ? +value : -value;
       newData[name] = value;
-      console.log(newData);
+      console.log('TransactionForm/handleInput: ', newData);
       return newData;
     });
   };
 
   const toggleMoneyWay = () => {
+    // странно, что это отдельно от остальных полей
     setIsIncome(isIncome => !isIncome);
 
     setData(data => {
       const newData = { ...data };
+
       newData.sum *= -1;
-      newData.category = '';
-      console.log(newData);
+      newData.category = ''; // ????????????
       return newData;
     });
   };
@@ -83,11 +85,27 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
     setData(initialFormValue); //TODO: тогда зачем мне это при открытии делать
     // и вообще, какое должно быть состояние у формы когда она закрыта? Что значит очисить форму?
     setIsIncome(false);
+    setError({ sum: false, category: false });
     onClose();
   };
 
   const add = e => {
     e.preventDefault();
+
+    //TODO: вынести валидацию в функцию
+    if (data.sum === 0) {
+      setError(oldError => ({ ...oldError, sum: true }));
+      return;
+    } else {
+      setError(oldError => ({ ...oldError, sum: false })); // Зачем эта ветка? Чтобы сбросить старый стейт?
+    }
+
+    if (data.category === '') {
+      setError(oldError => ({ ...oldError, category: true }));
+      return;
+    } else {
+      setError(oldError => ({ ...oldError, category: false }));
+    }
 
     if (currentTransactionID) {
       editTransaction(currentTransactionID, data);
@@ -99,21 +117,24 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   };
 
   return (
-    <Dialog open={isOpen} onClose={cancel}>
+    <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
       <form className={classes.root}>
-        <DialogTitle>{transaction ? 'Edit transaction' : 'Add new transaction'}</DialogTitle>
+        <DialogTitle>
+          {currentTransactionID ? 'Edit transaction' : 'Add new transaction'}
+        </DialogTitle>
 
         <DialogContent>
-          <DialogContentText>Всякая хуйня</DialogContentText>
+          {/* <DialogContentText>Всякая хрень</DialogContentText> */}
 
-          <AmountInput handleInput={handleInput} value={data.sum} />
-          <DateInput handleInput={handleInput} value={data.date} />
           <MoneyWaySwitch
             handleInput={toggleMoneyWay}
             value={isIncome}
             label={isIncome ? 'income' : 'outcome'}
           />
+          <AmountInput handleInput={handleInput} value={data.sum} error={error.sum} />
+          <DateInput handleInput={handleInput} value={data.date} />
           <CategorySelect
+            error={error.category}
             value={data.category}
             handleInput={handleInput}
             categories={categories[isIncome ? 'income' : 'outcome']}
