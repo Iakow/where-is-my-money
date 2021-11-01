@@ -1,37 +1,41 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import TableChartIcon from '@material-ui/icons/TableChart';
+import PieChartIcon from '@material-ui/icons/PieChart';
+import { Tabs, Tab } from '@material-ui/core';
 import List from './List';
 
-const drawerWidth = 140;
+import Budget from './Budget/Budget.js';
+
 const useStyles = makeStyles(theme => ({
-  title: {
-    flexGrow: 1,
-  },
-  drawer: {
-    top: '30px',
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
   main: {
     display: 'flex',
+    flexDirection: 'column',
+    paddingTop: 150,
+  },
+  header: {
+    display: 'flex',
+  },
+  filter: {
+    flexGrow: 1,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#80808024',
+    padding: 15,
+  },
+  budgetBtn: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '150px',
+    width: '150px',
   },
 }));
 
-import {
-  // вот это тоже можно инкапсулировать глубже
-  AppBar,
-  Button,
-  IconButton,
-  Drawer,
-  Tabs,
-  Tab,
-  Toolbar,
-} from '@material-ui/core';
-
 export default function Main({ userData, openForm }) {
+  console.log('  Main');
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
 
@@ -42,19 +46,13 @@ export default function Main({ userData, openForm }) {
 
   return (
     <main className={classes.main}>
-      <Drawer
-        variant="permanent"
-        className={classes.drawer}
-        classes={{
-          paper: classes.drawerPaper,
-        }}
-      >
-        <Toolbar /> {/* какой-то грязный хак */}
-        <Tabs orientation="vertical" value={tabValue} onChange={onTabChange}>
-          <Tab label="Table" />
-          <Tab label="Diagram" />
+      <header className={classes.header}>
+        <Tabs /* centered */ value={tabValue} onChange={onTabChange}>
+          <Tab icon={<TableChartIcon />} />
+          <Tab icon={<PieChartIcon />} />
         </Tabs>
-      </Drawer>
+        <div className={classes.filter}>обощенное название фильтра и попапчик</div>
+      </header>
 
       {tabValue === 0 && (
         <List
@@ -64,7 +62,7 @@ export default function Main({ userData, openForm }) {
         />
       )}
 
-      {tabValue === 1 && <div>Diagram</div>}
+      {tabValue === 1 && <Budget userData={userData} type="mobile" />}
     </main>
   );
 }

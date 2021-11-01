@@ -1,5 +1,6 @@
 import React from 'react';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import Budget from './Budget/Budget.js';
 
 import { signout } from '../data/firebase';
 import { makeStyles } from '@material-ui/core/styles';
@@ -12,6 +13,7 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     justifyContent: 'space-between',
     zIndex: 1201, // theme.zIndex.drawer + 1,
+    height: 140,
   },
 
   logoutButton: {
@@ -20,13 +22,15 @@ const useStyles = makeStyles(theme => ({
     color: 'white',
   },
   addButton: {
+    position: 'relative',
+    top: 60,
     color: '#f098ff',
   },
 }));
 
 import { AppBar, Button, IconButton } from '@material-ui/core';
 
-export default function Header({ balance, openForm }) {
+export default function Header({ userData, openForm }) {
   const classes = useStyles();
 
   return (
@@ -35,10 +39,10 @@ export default function Header({ balance, openForm }) {
         Sign out
       </Button>
 
-      <span>BALANCE: {balance}</span>
+      <Budget userData={userData} type="desktop" />
 
       <IconButton className={classes.addButton} onClick={() => openForm()}>
-        <AddCircleIcon />
+        <AddCircleIcon fontSize="large" />
       </IconButton>
     </AppBar>
   );
