@@ -8,6 +8,7 @@ import TransactionForm from './TransactionForm/TransactionForm';
 import Main from './Main';
 import Header from './Header';
 import SetBalanceForm from './SetBalanceForm';
+import Container from '@material-ui/core/Container';
 
 const useStyles = makeStyles(theme => ({
   loader: {
@@ -19,6 +20,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export default function App() {
+  /* console.log('App'); */
   const classes = useStyles();
 
   const { isResponseWaiting, userData, isAuth } = useFirebase();
@@ -32,24 +34,31 @@ export default function App() {
     setTransactionForm({ isOpen: true, transactionID: id });
   };
 
-  if (isResponseWaiting)
+  if (isResponseWaiting) {
+    console.log('App-waiting');
     return (
       <div className={classes.loader}>
         <CircularProgress />
       </div>
     );
+  }
 
-  if (isAuth === false) return <Auth />;
+  if (isAuth === false) {
+    console.log('App-auth');
+    return <Auth />;
+  }
 
   if (userData === null) {
+    console.log('App-set-balance');
     //TODO: try to put it in Auth
     return <SetBalanceForm />;
   }
 
+  console.log('App-main', 'userData.balance:', userData.balance);
   return (
-    <>
-      <Header balance={userData.balance} openForm={openForm} />
-      <Toolbar /> {/* //? */}
+    <Container maxWidth="lg">
+      <Header userData={userData} openForm={openForm} />
+
       <Main userData={userData} openForm={openForm} />
       <TransactionForm
         isOpen={transactionForm.isOpen}
@@ -57,6 +66,6 @@ export default function App() {
         userData={userData}
         currentTransactionID={transactionForm.transactionID}
       />
-    </>
+    </Container>
   );
 }
