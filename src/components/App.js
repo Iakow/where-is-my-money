@@ -5,7 +5,7 @@ import { Toolbar, CircularProgress } from '@material-ui/core';
 import { useFirebase } from '../data/firebase';
 import Auth from './Auth';
 import TransactionForm from './TransactionForm/TransactionForm';
-import Main from './Main';
+import Stats from './Stats/Stats';
 import Header from './Header';
 import SetBalanceForm from './SetBalanceForm';
 import Container from '@material-ui/core/Container';
@@ -54,12 +54,11 @@ export default function App() {
     return <SetBalanceForm />;
   }
 
-  console.log('App-main', 'userData.balance:', userData.balance);
   return (
     <Container maxWidth="lg">
       <Header userData={userData} openForm={openForm} />
 
-      <Main userData={userData} openForm={openForm} />
+      <Stats userData={userData} openForm={openForm} />
       <TransactionForm
         isOpen={transactionForm.isOpen}
         onClose={closeForm}

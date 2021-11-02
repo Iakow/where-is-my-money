@@ -5,9 +5,8 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-
-import styles from '../style';
-import { getHTMLDate } from '../utils';
+import styles from '../../style.css';
+import { getHTMLDate } from '../../utils';
 
 export default function Filters({ value, upFilterState, totalSelectedSum }) {
   const upPureValue = ({ target }) => {
@@ -41,38 +40,6 @@ export default function Filters({ value, upFilterState, totalSelectedSum }) {
           <FormControlLabel value="-1" control={<Radio checked={value === -1} />} label="Outcome" />
         </RadioGroup>
       </FormControl>
-
-      {/* <br />
-      <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          defaultValue="0"
-          defaultChecked={value === 0}
-          onChange={upPureValue}
-        />
-        All
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          defaultValue="1"
-          defaultChecked={value === 1}
-          onChange={upPureValue}
-        />
-        Income
-      </label>
-      <label>
-        <input
-          type="radio"
-          name="filterMoneyway"
-          defaultValue="-1"
-          defaultChecked={value === -1}
-          onChange={upPureValue}
-        />
-        Outcome
-      </label> */}
     </div>
   );
 
@@ -116,7 +83,6 @@ export default function Filters({ value, upFilterState, totalSelectedSum }) {
 
   return (
     <div>
-      {/* className={styles.filters} */}
       <FilterMoneyway value={value.filterMoneyway} />
       <DateFilter value={value.filterDate} />
 

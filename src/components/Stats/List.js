@@ -15,11 +15,10 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Popover from '@material-ui/core/Popover';
 
-import { removeTransaction } from '../data/firebase';
+import { removeTransaction } from '../../data/firebase';
 
-import styles from '../style';
-import { getDateString } from '../utils';
-import Filters from '../components/Filters';
+import { getDateString } from '../../utils';
+import Filters from './Filters';
 
 const useStyles = makeStyles({
   outcome: {
@@ -28,12 +27,16 @@ const useStyles = makeStyles({
   income: {
     color: 'green',
   },
-  /* head: {
-    '& th': {
-      backgroundColor: '#0a0a50',
-      color: 'white',
-    },
-  }, */
+  comment: {
+    fontSize: 14,
+  },
+  date: {
+    fontSize: 14,
+  },
+  list: {
+    height: '75vh',
+    overflowY: 'scroll',
+  },
 });
 
 const comparator = (prop, desc = true) => (a, b) => {
@@ -51,6 +54,7 @@ const comparator = (prop, desc = true) => (a, b) => {
 };
 
 export default function List({ transactions, categories, openForm }) {
+  console.log('    List');
   const classes = useStyles();
 
   const [columns, setColumns] = useState([
@@ -63,6 +67,28 @@ export default function List({ transactions, categories, openForm }) {
 
   const [rows, setRows] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+
+  const [filters, setFilters] = useState({
+    filterMoneyway: 0,
+    filterDate: {
+      firstDate: { dateValue: 0, isEnabled: false },
+      lastDate: { dateValue: Date.now(), isEnabled: false },
+    },
+  });
+
+  useEffect(() => {
+    console.log('List-useffect');
+
+    const activeSortingCell = columns.find(item => item.active === true);
+
+    setRows(
+      [...transactions].sort(
+        comparator(activeSortingCell.name.toLowerCase(), activeSortingCell.order),
+      ),
+    );
+  }, [transactions]);
+
+  let totalSum = 0;
 
   const onSortClick = index => () => {
     setColumns(
@@ -78,30 +104,6 @@ export default function List({ transactions, categories, openForm }) {
         .sort(comparator(columns[index].name.toLowerCase(), columns[index].order === 'desc')),
     );
   };
-
-  const [filters, setFilters] = useState({
-    filterMoneyway: 0,
-    filterDate: {
-      firstDate: { dateValue: 0, isEnabled: false },
-      lastDate: { dateValue: Date.now(), isEnabled: false },
-    },
-  });
-
-  useEffect(() => {
-    /* filterTransactions(filters); */
-    /* нужно применить компаратор, но сперва как-то узнать какая из сортировок активна и куда */
-    /* найти sortable: true, active: true и извлечь order*/
-
-    const x = columns.find(item => item.active === true); // нихуя не безопасно
-
-    setRows(
-      Object.entries({ ...transactions })
-        .map(item => ({ id: item[0], ...item[1] }))
-        .sort(comparator(x.name.toLowerCase(), x.order)),
-    );
-  }, [transactions]);
-
-  let totalSum = 0;
 
   function handleFilterControlls(name, value) {
     const newFilterState = { ...filters };
@@ -137,7 +139,10 @@ export default function List({ transactions, categories, openForm }) {
         transaction => filters.filterMoneyway * transaction.sum > 0,
       );
     }
-    console.log(filteredTransactions);
+    // console.log('List/filterTransactions: ', filteredTransactions);
+    filteredTransactions.forEach(transaction => {
+      totalSum += transaction.sum;
+    }); //// так не работает
     return filteredTransactions;
   }
 
@@ -155,7 +160,7 @@ export default function List({ transactions, categories, openForm }) {
 
   return (
     <>
-      <Paper /* className={styles.list} */>
+      <Paper className={classes.list}>
         <Table stickyHeader size="small">
           <TableHead className={classes.head}>
             <TableRow>
@@ -213,11 +218,12 @@ export default function List({ transactions, categories, openForm }) {
                 const { date, category, comment, sum, id } = transaction;
                 const categoryGroup = sum < 0 ? 'outcome' : 'income';
                 totalSum += sum;
-                const color = { outcome: 'red', income: 'green' };
 
                 return (
                   <TableRow hover={true} key={id} id={id}>
-                    <TableCell>{new Date(date).toLocaleString()}</TableCell>
+                    <TableCell className={classes.date}>
+                      {new Date(date).toLocaleString()}
+                    </TableCell>
 
                     <TableCell align="right" className={classes[categoryGroup]}>
                       {sum}
@@ -225,7 +231,7 @@ export default function List({ transactions, categories, openForm }) {
 
                     <TableCell>{categories[categoryGroup][category]}</TableCell>
 
-                    <TableCell>{comment}</TableCell>
+                    <TableCell className={classes.comment}>{comment}</TableCell>
 
                     <TableCell align="right">
                       <IconButton
