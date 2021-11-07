@@ -14,6 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Popover from '@material-ui/core/Popover';
+import Chip from '@material-ui/core/Chip';
 
 import { removeTransaction } from '../../data/firebase';
 
@@ -53,7 +54,7 @@ const comparator = (prop, desc = true) => (a, b) => {
   return 0 * order;
 };
 
-export default function List({ transactions, categories, openForm }) {
+export default function List({ transactions, categories, userTags, openForm }) {
   console.log('    List');
   const classes = useStyles();
 
@@ -61,6 +62,7 @@ export default function List({ transactions, categories, openForm }) {
     { name: 'Date', sortable: true, active: true },
     { name: 'Sum', sortable: true, active: false, numeric: true },
     { name: 'Category', sortable: true, active: false },
+    { name: 'Tags', sortable: true, active: false },
     { name: 'Comment', sortable: true, active: false },
     { name: '', sortable: false },
   ]);
@@ -215,7 +217,7 @@ export default function List({ transactions, categories, openForm }) {
           <TableBody>
             {filterTransactions() // надо это делать на основе стейта фильтра
               .map(transaction => {
-                const { date, category, comment, sum, id } = transaction;
+                const { date, category, comment, sum, tags, id } = transaction;
                 const categoryGroup = sum < 0 ? 'outcome' : 'income';
                 totalSum += sum;
 
@@ -230,6 +232,22 @@ export default function List({ transactions, categories, openForm }) {
                     </TableCell>
 
                     <TableCell>{categories[categoryGroup][category]}</TableCell>
+
+                    <TableCell>
+                      {tags // TODO: won't need after release
+                        ? tags.map(tag =>
+                            userTags[tag] ? (
+                              <Chip
+                                key={tag}
+                                label={userTags[tag]}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            ) : null,
+                          )
+                        : null}
+                    </TableCell>
 
                     <TableCell className={classes.comment}>{comment}</TableCell>
 

@@ -105,7 +105,12 @@ export default function Stats({ userData, openForm }) {
       </header>
 
       {tabValue === 0 && (
-        <List transactions={tableData} categories={userData.categories} openForm={openForm} />
+        <List
+          transactions={tableData}
+          userTags={userData.tags}
+          categories={userData.categories}
+          openForm={openForm}
+        />
       )}
 
       {tabValue === 1 && (

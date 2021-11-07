@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AmountInput from './AmountInput';
 import DateInput from './DateInput';
+import TagsInput from './TagsInput';
 import MoneyWaySwitch from './MoneyWaySwitch';
 import CategorySelect from './CategorySelect';
 import CommentInput from './CommentInput';
@@ -27,10 +28,12 @@ const useStyles = makeStyles(theme => ({
 export default function TransactionForm({ isOpen, onClose, currentTransactionID, userData }) {
   const classes = useStyles();
 
+  /* Нужны ли мне тут  initialFormValue, или же инпуты должны справляться с пустыми значениями?*/
   const initialFormValue = {
     date: Date.now(),
     sum: 0,
     category: '',
+    tags: [], // как-то тупо. Почему не null?
     comment: '',
   };
 
@@ -51,6 +54,7 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   const [error, setError] = useState({ sum: false, category: false });
 
   useEffect(() => {
+    // ???
     if (currentTransactionID) {
       setData({ ...transaction });
       setIsIncome(transaction.sum > 0 ? true : false);
@@ -63,7 +67,6 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
 
       if (name == 'sum') value = isIncome === true ? +value : -value;
       newData[name] = value;
-      console.log('TransactionForm/handleInput: ', newData);
       return newData;
     });
   };
@@ -139,6 +142,7 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
             handleInput={handleInput}
             categories={categories[isIncome ? 'income' : 'outcome']}
           />
+          <TagsInput value={data.tags || []} handleInput={handleInput} userTags={userData.tags} />
           <CommentInput value={data.comment} handleInput={handleInput} />
         </DialogContent>
 

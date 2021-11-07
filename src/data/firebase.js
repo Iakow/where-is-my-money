@@ -13,30 +13,39 @@ let userDBRef;
 export let email;
 
 export function useFirebase() {
-  const [isResponseWaiting, setIsResponceWaiting] = useState(true);
+  // BUG App грузится вместо лоадера, когда еще нельзя получить баланс, в шапке undefined
+  //TODO userData не должен обновляться, пока не будут готовы все нужные данные.
+  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // должно быть здесь?
   const [userData, setUserData] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
+    console.log('FB-useEffect');
+    // а надо?
     const dataCb = data => {
-      if (data) setUserData(userData => ({ ...userData, ...data }));
-      setIsAuth(true);
-      setIsResponceWaiting(false);
+      if (data) {
+        console.log('%c   setUserData()', 'background: #222; color: #bada55');
+        setUserData(userData => ({ ...userData, ...data }));
+        console.log('%c   setIsAuth()', 'background: #222; color: #bada55');
+        setIsAuth(true);
+        console.log('%c   setIsResponceWaiting()', 'background: #222; color: #bada55');
+        if (data.transactions) setIsResponceWaiting(false);
+      }
     };
 
     const authCb = () => {
-      setUserData(null);
+      setUserData(null); // ???
       setIsResponceWaiting(false);
       setIsAuth(false);
     };
 
-    connectFirebase(dataCb, authCb);
+    connectFirebase(dataCb, authCb); // вот что оно делает по сути
   }, []);
 
   return { isResponseWaiting, userData, isAuth };
 }
 
-export function connectFirebase(userDataCb, authCb) {
+function connectFirebase(userDataHandler, authCb) {
   if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 
@@ -48,19 +57,31 @@ export function connectFirebase(userDataCb, authCb) {
       });
   }
 
+  //TODO: нельзя навешивать листнеры на данные, не убедившись, что контракт соблюден.
+  // сперва запросить БД, проверить, если не ок - задать баланс и остальные поля.
   firebase.auth().onAuthStateChanged(user => {
     const addDataListeners = () => {
+      console.log('       ADDING LISTENERS');
+
       userDBRef.onSnapshot(userData => {
-        console.log('listner1');
+        // для категорий и т.д.
         if (userData.data()) {
-          userDataCb({ ...userData.data() });
-        } else {
-          userDataCb(null);
-        }
+          console.log(
+            '%conUserDoc',
+            'background: #222; color: #bada55; text-decoration: underline;',
+          );
+          // а когда кейс, когда вот это не выполняется???
+          userDataHandler({ ...userData.data() });
+        } /* else {
+          userDataHandler(null);
+        } */
       });
 
       userDBRef.collection('transactions').onSnapshot(transactionsSnapshot => {
-        console.log('listner2');
+        console.log(
+          '%conTransactions',
+          'background: #222; color: #bada55; text-decoration: underline;',
+        );
         const transactions = {};
         let balance = null;
 
@@ -73,9 +94,9 @@ export function connectFirebase(userDataCb, authCb) {
         });
 
         if (balance !== null) {
-          userDataCb({ balance, transactions });
+          userDataHandler({ balance, transactions });
         } else {
-          userDataCb(null);
+          userDataHandler(null);
         }
       });
     };
@@ -83,6 +104,8 @@ export function connectFirebase(userDataCb, authCb) {
     if (user) {
       email = user.email;
       userDBRef = firebase.firestore().collection('users').doc(user.uid);
+      // по сути мы неявно создадим этот док, при первом использовании рефа!
+      // мож это можно использовать?
       addDataListeners();
     } else {
       authCb();
@@ -119,6 +142,15 @@ export function initializeUserDB(balance) {
   );
 }
 
+export function addBudget(data) {
+  return userDBRef
+    .set({ budget: data }, { merge: true })
+    .then(() => {
+      console.log('budget added');
+    })
+    .catch(error => console.error('Error updating document: ', error));
+}
+
 export function signout() {
   firebase.auth().signOut();
 }
@@ -141,6 +173,58 @@ export function addNewTransaction(transaction) {
   return batch.commit().catch(error => {
     console.error('Error adding document: ', error);
   });
+}
+
+export function addNewTag(tagValue) {
+  const generateRandomKey = () => {
+    const source = new Uint32Array(4);
+    crypto.getRandomValues(source);
+    return source.reduce((acc, decimal) => acc + decimal.toString(16), '');
+  };
+
+  userDBRef
+    .set(
+      {
+        tags: {
+          [generateRandomKey()]: tagValue,
+        },
+      },
+      { merge: true },
+    )
+    .then(() => {
+      console.log('Looks like ok');
+    })
+    .catch(error => {
+      console.error('Error writing document: ', error);
+    });
+}
+
+export function editTag(tagKay, tagValue) {
+  const path = `tags.${tagKay}`;
+  userDBRef
+    .update({
+      [path]: tagValue,
+    })
+    .then(() => {
+      console.log('Looks like ok');
+    })
+    .catch(error => {
+      console.error('Error writing document: ', error);
+    });
+}
+
+export function removeTag(tagKay) {
+  const path = `tags.${tagKay}`;
+  userDBRef
+    .update({
+      [path]: firebase.firestore.FieldValue.delete(),
+    })
+    .then(() => {
+      console.log('Looks like ok');
+    })
+    .catch(error => {
+      console.error('Error writing document: ', error);
+    });
 }
 
 export function editTransaction(id, newData) {
