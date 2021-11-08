@@ -19,14 +19,20 @@ const Chart = ({ userData, type }) => {
 
   //TODO это можно делать один раз во время записи в бд и хранить это там в поле
   //TODO а если денег на самом деле больше чем было???? Надо таки писать начальное велью бюджета и юзать его как максимум для чарта
-  const calculateMoneySpent = () =>
-    Math.abs(
+  const calculateMoneySpent = () => {
+    const moneySpent = Math.abs(
       Object.values({ ...transactions })
         .filter(
-          transaction => transaction.date < budget.lastDate && transaction.date > budget.firstDate,
+          transaction =>
+            transaction.date < budget.lastDate &&
+            transaction.date > budget.firstDate &&
+            transaction.sum < 0,
         )
         .reduce((moneySpent, transaction) => moneySpent + transaction.sum, 0),
     );
+
+    return moneySpent;
+  };
 
   const pieData = {
     moneyInfo: [
