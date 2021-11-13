@@ -1,4 +1,6 @@
 export function getHTMLDate(timestamp) {
+  if (timestamp === null) return '';
+
   const d = new Date(timestamp);
 
   const DD = d.getDate() > 9 ? d.getDate() : `0${d.getDate()}`;
