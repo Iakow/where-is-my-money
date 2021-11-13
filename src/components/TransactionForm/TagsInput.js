@@ -25,6 +25,9 @@ const useStyles = makeStyles({
     padding: 10,
     display: 'flex',
   },
+  addTag: {
+    marginLeft: 16,
+  },
 });
 
 export default function TagsInput({ value, handleInput, userTags }) {
@@ -70,20 +73,22 @@ export default function TagsInput({ value, handleInput, userTags }) {
         onChange={handleChange}
       >
         {userTagKeys.map((tagKey, i) => (
-          // <MenuItem value={tagKey} key={tagKey}>
-          //   <Checkbox checked={nativeValue.indexOf(tagKey) > -1} />
-          //   <ListItemText primary={userTags[tagKey]} />
-          // </MenuItem>
-          <Chip value={tagKey} key={tagKey} label={userTags[tagKey]} />
+          <MenuItem value={tagKey} key={tagKey}>
+            <Checkbox checked={nativeValue.indexOf(tagKey) > -1} />
+            <ListItemText primary={userTags[tagKey]} />
+          </MenuItem>
         ))}
 
-        <div value="addTag">
+        <div className={classes.addTag} value="addTag">
           <TextField
             value={textValue}
             placeholder="You can add new tag"
             variant="outlined"
             onChange={({ target }) => {
               setTextValue(target.value);
+            }}
+            onKeyDown={e => {
+              e.stopPropagation();
             }}
           />
 
