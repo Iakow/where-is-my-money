@@ -13,23 +13,8 @@ import {
 } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
-  budgetBtn: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '150px',
-    width: '150px',
-  },
-  chart: {
-    height: '400px',
-    width: '400px',
-  },
-  outerChart: {
-    height: '400px',
-    width: '400px',
-    position: 'absolute',
-    top: 0,
+  input: {
+    marginBottom: 20,
   },
 }));
 
@@ -68,10 +53,11 @@ const Form = ({ value, isOpen, close }) => {
   return (
     <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
       <form>
-        <DialogTitle>title</DialogTitle>
+        <DialogTitle>Budget</DialogTitle>
 
         <DialogContent>
           <TextField
+            className={classes.input}
             label="Date"
             name="firstDate"
             type="datetime-local"
