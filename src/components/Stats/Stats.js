@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import PieChartIcon from '@material-ui/icons/PieChart';
 import { Tabs, Tab } from '@material-ui/core';
 import List from './List';
-import TimeFilter from './TImeFilter';
+import StatsTimeFilter from './StatsTImeFilter';
 import Diagram from './Diargam';
 
 const useStyles = makeStyles(theme => ({
@@ -15,14 +15,6 @@ const useStyles = makeStyles(theme => ({
   },
   header: {
     display: 'flex',
-  },
-  filter: {
-    flexGrow: 1,
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#80808024',
-    padding: 15,
   },
   budgetBtn: {
     display: 'flex',
@@ -42,39 +34,38 @@ export default function Stats({ userData, openForm }) {
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
 
-  //TODO костыль убрать, дату надо как-то обновлять или иначе обрабатывать
-  const [filters, setFilters] = useState({ startDate: 0, lastDate: Date.now() + 10000 });
+  const [filters, setFilters] = useState({ startDate: null, lastDate: null });
 
   const handleFilterChange = (name, value) => {
-    //TODO поискать варик лаконичнее
-    setFilters(oldFilters => {
-      const newFilterState = { ...oldFilters };
-      newFilterState[name] = value;
-      return newFilterState;
-    });
+    setFilters(oldFilters => ({ ...oldFilters, ...{ [name]: value } }));
   };
 
   const onTabChange = (e, value) => {
-    // зачем тут e?
     setTabValue(value);
   };
 
   const calculateStatsData = () => {
-    const userCategories = userData.categories;
+    const { categories: userCategories, transactions } = userData;
     const { startDate, lastDate } = filters;
 
+    // create empty chartData
     const chartData = {};
-    for (let type in userCategories) {
-      chartData[type] = userCategories[type].map(category => ({ name: category, sum: 0 }));
+    for (let moneyWay in userCategories) {
+      chartData[moneyWay] = userCategories[moneyWay].map(category => ({ name: category, sum: 0 }));
     }
 
-    const preparedTransactions = Object.entries(userData.transactions).map(([key, value]) => ({
+    // {transactions}  => [transactions]
+    const transactionsArr = Object.entries(transactions).map(([key, value]) => ({
       id: key,
       ...value,
     }));
 
-    const tableData = preparedTransactions.filter(({ date, sum, category }) => {
-      const isInSample = startDate <= date && date <= lastDate;
+    // filter transactions && fill chartData
+    const tableData = transactionsArr.filter(({ date, sum, category }) => {
+      const start = startDate === null ? true : startDate <= date;
+      const end = lastDate === null ? true : date <= lastDate;
+
+      const isInSample = start && end;
 
       if (isInSample === true)
         chartData[sum > 0 ? 'income' : 'outcome'][category]['sum'] += Math.abs(sum);
@@ -85,7 +76,10 @@ export default function Stats({ userData, openForm }) {
     return { chartData, tableData };
   };
 
-  const { chartData, tableData } = calculateStatsData();
+  const { chartData, tableData } = useMemo(() => calculateStatsData(userData.transactions), [
+    userData.transactions,
+    filters,
+  ]);
 
   return (
     <main className={classes.main}>
@@ -95,13 +89,11 @@ export default function Stats({ userData, openForm }) {
           <Tab icon={<PieChartIcon />} />
         </Tabs>
 
-        <div className={classes.filter}>
-          <TimeFilter
-            handler={handleFilterChange}
-            filterValue={filters} // а как я тут определю None, например?
-            budgetValue={userData.budget}
-          />
-        </div>
+        <StatsTimeFilter
+          handler={handleFilterChange}
+          filterValue={filters}
+          budgetValue={userData.budget}
+        />
       </header>
 
       {tabValue === 0 && (
