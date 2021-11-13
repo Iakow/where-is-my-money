@@ -15,6 +15,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Popover from '@material-ui/core/Popover';
 import Chip from '@material-ui/core/Chip';
+import FastfoodIcon from '@material-ui/icons/Fastfood';
 
 import { removeTransaction } from '../../data/firebase';
 
@@ -55,7 +56,6 @@ const comparator = (prop, desc = true) => (a, b) => {
 };
 
 export default function List({ transactions, categories, userTags, openForm }) {
-  console.log('    List');
   const classes = useStyles();
 
   const [columns, setColumns] = useState([
@@ -72,15 +72,9 @@ export default function List({ transactions, categories, userTags, openForm }) {
 
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
-    filterDate: {
-      firstDate: { dateValue: 0, isEnabled: false },
-      lastDate: { dateValue: Date.now(), isEnabled: false },
-    },
   });
 
   useEffect(() => {
-    console.log('List-useffect');
-
     const activeSortingCell = columns.find(item => item.active === true);
 
     setRows(
@@ -121,27 +115,14 @@ export default function List({ transactions, categories, userTags, openForm }) {
   }
 
   function filterTransactions() {
-    // как-то оно подозрительно похоже на редюсер
     let filteredTransactions = [...rows];
-
-    if (filters.filterDate.firstDate.isEnabled) {
-      filteredTransactions = filteredTransactions.filter(
-        transaction => transaction.date >= filters.filterDate.firstDate.dateValue,
-      );
-    }
-
-    if (filters.filterDate.lastDate.isEnabled) {
-      filteredTransactions = filteredTransactions.filter(
-        transaction => transaction.date <= filters.filterDate.lastDate.dateValue,
-      );
-    }
 
     if (filters.filterMoneyway !== 0) {
       filteredTransactions = filteredTransactions.filter(
         transaction => filters.filterMoneyway * transaction.sum > 0,
       );
     }
-    // console.log('List/filterTransactions: ', filteredTransactions);
+
     filteredTransactions.forEach(transaction => {
       totalSum += transaction.sum;
     }); //// так не работает
@@ -201,11 +182,7 @@ export default function List({ transactions, categories, userTags, openForm }) {
                           horizontal: 'center',
                         }}
                       >
-                        <Filters
-                          value={filters}
-                          upFilterState={handleFilterControlls}
-                          totalSelectedSum={totalSum}
-                        />
+                        <Filters value={filters} upFilterState={handleFilterControlls} />
                       </Popover>
                     </TableCell>
                   );
@@ -231,7 +208,10 @@ export default function List({ transactions, categories, userTags, openForm }) {
                       {sum}
                     </TableCell>
 
-                    <TableCell>{categories[categoryGroup][category]}</TableCell>
+                    <TableCell>
+                      <FastfoodIcon fontSize="small" />
+                      {categories[categoryGroup][category]}
+                    </TableCell>
 
                     <TableCell>
                       {tags // TODO: won't need after release
