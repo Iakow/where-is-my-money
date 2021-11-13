@@ -12,40 +12,7 @@ const firebaseConfig = {
 let userDBRef;
 export let email;
 
-export function useFirebase() {
-  // BUG App грузится вместо лоадера, когда еще нельзя получить баланс, в шапке undefined
-  //TODO userData не должен обновляться, пока не будут готовы все нужные данные.
-  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // должно быть здесь?
-  const [userData, setUserData] = useState(null);
-  const [isAuth, setIsAuth] = useState(false);
-
-  useEffect(() => {
-    console.log('FB-useEffect');
-    // а надо?
-    const dataCb = data => {
-      if (data) {
-        console.log('%c   setUserData()', 'background: #222; color: #bada55');
-        setUserData(userData => ({ ...userData, ...data }));
-        console.log('%c   setIsAuth()', 'background: #222; color: #bada55');
-        setIsAuth(true);
-        console.log('%c   setIsResponceWaiting()', 'background: #222; color: #bada55');
-        if (data.transactions) setIsResponceWaiting(false);
-      }
-    };
-
-    const authCb = () => {
-      setUserData(null); // ???
-      setIsResponceWaiting(false);
-      setIsAuth(false);
-    };
-
-    connectFirebase(dataCb, authCb); // вот что оно делает по сути
-  }, []);
-
-  return { isResponseWaiting, userData, isAuth };
-}
-
-function connectFirebase(userDataHandler, authCb) {
+function setupFirebase() {
   if (firebase.apps.length === 0) {
     firebase.initializeApp(firebaseConfig);
 
@@ -56,61 +23,107 @@ function connectFirebase(userDataHandler, authCb) {
         console.error(err);
       });
   }
+}
 
-  //TODO: нельзя навешивать листнеры на данные, не убедившись, что контракт соблюден.
-  // сперва запросить БД, проверить, если не ок - задать баланс и остальные поля.
-  firebase.auth().onAuthStateChanged(user => {
-    const addDataListeners = () => {
-      console.log('       ADDING LISTENERS');
+function watchUserData(handleData) {
+  /* тут транзакции отдельно, юзердок отдельно. Как совместить? */
 
-      userDBRef.onSnapshot(userData => {
-        // для категорий и т.д.
-        if (userData.data()) {
-          console.log(
-            '%conUserDoc',
-            'background: #222; color: #bada55; text-decoration: underline;',
-          );
-          // а когда кейс, когда вот это не выполняется???
-          userDataHandler({ ...userData.data() });
-        } /* else {
-          userDataHandler(null);
-        } */
-      });
-
-      userDBRef.collection('transactions').onSnapshot(transactionsSnapshot => {
-        console.log(
-          '%conTransactions',
-          'background: #222; color: #bada55; text-decoration: underline;',
-        );
-        const transactions = {};
-        let balance = null;
-
-        transactionsSnapshot.forEach(transaction => {
-          if (transaction.id !== 'balance') {
-            transactions[transaction.id] = transaction.data();
-          } else {
-            balance = transaction.data().value;
-          }
-        });
-
-        if (balance !== null) {
-          userDataHandler({ balance, transactions });
-        } else {
-          userDataHandler(null);
-        }
-      });
-    };
-
-    if (user) {
-      email = user.email;
-      userDBRef = firebase.firestore().collection('users').doc(user.uid);
-      // по сути мы неявно создадим этот док, при первом использовании рефа!
-      // мож это можно использовать?
-      addDataListeners();
-    } else {
-      authCb();
+  userDBRef.onSnapshot(userData => {
+    if (userData.data()) {
+      console.log(userData.data());
+      handleData({ ...userData.data() });
     }
   });
+
+  userDBRef.collection('transactions').onSnapshot(transactionsSnapshot => {
+    const transactions = {};
+    let balance = null;
+
+    transactionsSnapshot.forEach(transaction => {
+      // а нельзя без перебора?
+      if (transaction.id !== 'balance') {
+        transactions[transaction.id] = transaction.data();
+      } else {
+        balance = transaction.data().value;
+      }
+    });
+
+    if (balance !== null) {
+      // если после срабатывания второго листнера баланса нету - новый юзер. Но его еще можно просто прочесть.
+      handleData({ balance, transactions });
+    } else {
+      handleData(null); // ????????????????????????????????????
+    }
+  });
+}
+
+const emptyUserData = {
+  transactions: {},
+  /* balance: null, */
+  tags: [],
+  categories: {
+    income: [],
+    outcome: [],
+  },
+};
+
+export function useFirebase() {
+  //TODO userData не должен обновляться, пока не приобретет заданную форму?
+
+  const [isResponseWaiting, setIsResponceWaiting] = useState(true); // можно ли рендерить что-нибудь?
+  const [userData, setUserData] = useState(emptyUserData);
+  const [isAuth, setIsAuth] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  function onUserDataChanges(data) {
+    if (data) {
+      console.log('%c   setUserData()', 'background: #222; color: #bada55');
+
+      setUserData(userData => {
+        return { ...userData, ...data };
+      });
+
+      console.log('%c   setIsAuth()', 'background: #222; color: #bada55');
+
+      setIsAuth(true);
+
+      console.log('%c   setIsResponceWaiting()', 'background: #222; color: #bada55');
+
+      if (data.transactions) setIsResponceWaiting(false);
+    }
+  }
+
+  function onNoAuth() {
+    setUserData(emptyUserData); // потереть данные прошлой сессии
+    setIsResponceWaiting(false); // это если нет авторизации и onUserDataChanges не срабатывал
+    setIsAuth(false);
+  }
+
+  useEffect(() => {
+    console.log('FB-useEffect');
+    setupFirebase();
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        //email = user.email;
+        userDBRef = firebase.firestore().collection('users').doc(user.uid);
+
+        // 1. Получаем юзердок
+        // 2. Если его не существует - вот здесь и нужно задавать баланс и сразу инициализировать все остальное❗️❗️❗️
+        // 3. По итогам - навешивать листнеры.
+        // Вопрос - как мне прерваться на установку баланса и инициализацию, а потом навесить листнеры ❓❓❓
+
+        // Два useEffect. Первый - один раз. Читаем док, если ок - initialized = true. И стработает второй с листнерами.
+        // Если не ок? Нужен флаг, который переведет UI на баланс. ...
+
+        watchUserData(onUserDataChanges);
+      } else {
+        onNoAuth();
+      }
+    });
+  }, []);
+
+  return { isResponseWaiting, userData, isAuth };
 }
 
 export function register(email, password) {
