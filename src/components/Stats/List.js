@@ -12,12 +12,12 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import EditIcon from '@material-ui/icons/Edit';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+
 import Popover from '@material-ui/core/Popover';
 import Chip from '@material-ui/core/Chip';
 import FastfoodIcon from '@material-ui/icons/Fastfood';
-
-import { removeTransaction } from '../../data/firebase';
+import TableFooter from '@material-ui/core/TableFooter';
+import { Badge } from '@material-ui/core';
 
 import { getDateString } from '../../utils';
 import Filters from './Filters';
@@ -36,8 +36,20 @@ const useStyles = makeStyles({
     fontSize: 14,
   },
   list: {
-    height: '75vh',
-    overflowY: 'scroll',
+    maxHeight: '75vh',
+    overflowY: 'auto',
+  },
+  body: {
+    /* marginBottom: 30, */
+  },
+  footer: {
+    backgroundColor: '#ededed',
+    height: 50,
+    left: 0,
+    bottom: 0,
+    zIndex: 2,
+    position: 'sticky',
+    fontSize: 20,
   },
 });
 
@@ -165,7 +177,13 @@ export default function List({ transactions, categories, userTags, openForm }) {
                     <TableCell key={column.name} align="right">
                       <Tooltip title="Filter list">
                         <IconButton aria-label="filter list" onClick={handleClick}>
-                          <FilterListIcon />
+                          <Badge
+                            color="secondary"
+                            variant="dot"
+                            invisible={filters.filterMoneyway === 0}
+                          >
+                            <FilterListIcon />
+                          </Badge>
                         </IconButton>
                       </Tooltip>
                       <Popover
@@ -191,7 +209,7 @@ export default function List({ transactions, categories, userTags, openForm }) {
             </TableRow>
           </TableHead>
 
-          <TableBody>
+          <TableBody className={classes.body}>
             {filterTransactions() // надо это делать на основе стейта фильтра
               .map(transaction => {
                 const { date, category, comment, sum, tags, id } = transaction;
@@ -240,14 +258,22 @@ export default function List({ transactions, categories, userTags, openForm }) {
                       >
                         <EditIcon />
                       </IconButton>
-                      <IconButton aria-label="filter list" onClick={e => removeTransaction(id)}>
+
+                      {/* <IconButton aria-label="filter list" onClick={e => removeTransaction(id)}>
                         <DeleteForeverIcon />
-                      </IconButton>
+                      </IconButton> */}
                     </TableCell>
                   </TableRow>
                 );
               })}
           </TableBody>
+          <TableFooter className={classes.footer}>
+            <TableRow>
+              <TableCell colSpan={6}>
+                Сюда можно вставить какую-нибудь инфу, только не ясно чо шрифт такой маленький
+              </TableCell>
+            </TableRow>
+          </TableFooter>
         </Table>
       </Paper>
     </>

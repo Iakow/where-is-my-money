@@ -6,6 +6,9 @@ import MoneyWaySwitch from './MoneyWaySwitch';
 import CategorySelect from './CategorySelect';
 import CommentInput from './CommentInput';
 import { editTransaction, addNewTransaction } from '../../data/firebase';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
+import { removeTransaction } from '../../data/firebase';
 import {
   Dialog,
   DialogActions,
@@ -21,6 +24,11 @@ const useStyles = makeStyles(theme => ({
     '& .MuiTextField-root': {
       marginBottom: theme.spacing(3),
       /* width: '25ch', */
+    },
+    '& .MuiTypography-root': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
     },
   },
 }));
@@ -92,6 +100,11 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
     onClose();
   };
 
+  const del = () => {
+    removeTransaction(currentTransactionID);
+    cancel();
+  };
+
   const add = e => {
     e.preventDefault();
 
@@ -122,8 +135,13 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   return (
     <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
       <form className={classes.root}>
-        <DialogTitle>
+        <DialogTitle className={classes.title}>
           {currentTransactionID ? 'Edit transaction' : 'Add new transaction'}
+          {currentTransactionID && (
+            <IconButton aria-label="filter list" onClick={del}>
+              <DeleteForeverIcon color="secondary" />
+            </IconButton>
+          )}
         </DialogTitle>
 
         <DialogContent>
