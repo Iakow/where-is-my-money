@@ -40,7 +40,8 @@ const TimeFilter = ({ handler, filterValue, budgetValue }) => {
   const [value, setValue] = useState('None');
 
   const handleManualInput = ({ target }) => {
-    handler(target.name, new Date(target.value).getTime());
+    const value = target.value === '' ? null : new Date(target.value).getTime();
+    handler(target.name, value);
   };
 
   const handleClick = event => {
