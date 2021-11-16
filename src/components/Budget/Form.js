@@ -58,7 +58,7 @@ const Form = ({ value, isOpen, close }) => {
         <DialogContent>
           <TextField
             className={classes.input}
-            label="Date"
+            label="First Date"
             name="firstDate"
             type="datetime-local"
             value={getHTMLDate(budget.firstDate)}
@@ -68,7 +68,7 @@ const Form = ({ value, isOpen, close }) => {
           />
 
           <TextField
-            label="Date"
+            label="Last Date"
             name="lastDate"
             type="datetime-local"
             value={getHTMLDate(budget.lastDate)}
