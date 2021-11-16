@@ -9,6 +9,7 @@ import { editTransaction, addNewTransaction } from '../../data/firebase';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import { removeTransaction } from '../../data/firebase';
+import ErrorOutlineOutlinedIcon from '@material-ui/icons/ErrorOutlineOutlined';
 import {
   Dialog,
   DialogActions,
@@ -35,6 +36,8 @@ const useStyles = makeStyles(theme => ({
 
 export default function TransactionForm({ isOpen, onClose, currentTransactionID, userData }) {
   const classes = useStyles();
+
+  const [alertOpen, setAlertOpen] = useState(false);
 
   /* Нужны ли мне тут  initialFormValue, или же инпуты должны справляться с пустыми значениями?*/
   const initialFormValue = {
@@ -101,7 +104,12 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   };
 
   const del = () => {
+    setAlertOpen(true);
+  };
+
+  const confirm = () => {
     removeTransaction(currentTransactionID);
+    setAlertOpen(false);
     cancel();
   };
 
@@ -133,46 +141,78 @@ export default function TransactionForm({ isOpen, onClose, currentTransactionID,
   };
 
   return (
-    <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
-      <form className={classes.root}>
-        <DialogTitle className={classes.title}>
-          {currentTransactionID ? 'Edit transaction' : 'Add new transaction'}
-          {currentTransactionID && (
-            <IconButton aria-label="filter list" onClick={del}>
-              <DeleteForeverIcon color="secondary" />
-            </IconButton>
-          )}
+    <>
+      <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
+        <form className={classes.root}>
+          <DialogTitle className={classes.title}>
+            {currentTransactionID ? 'Edit transaction' : 'Add new transaction'}
+            {currentTransactionID && (
+              <IconButton aria-label="filter list" onClick={del} fontSize="large">
+                <DeleteForeverIcon color="secondary" />
+              </IconButton>
+            )}
+          </DialogTitle>
+
+          <DialogContent>
+            {/* <DialogContentText>Всякая хрень</DialogContentText> */}
+
+            <MoneyWaySwitch
+              handleInput={toggleMoneyWay}
+              value={isIncome}
+              label={isIncome ? 'income' : 'outcome'}
+            />
+            <AmountInput handleInput={handleInput} value={data.sum} error={error.sum} />
+            <DateInput handleInput={handleInput} value={data.date} />
+            <CategorySelect
+              error={error.category}
+              value={data.category}
+              handleInput={handleInput}
+              categories={categories[isIncome ? 'income' : 'outcome']}
+            />
+            <TagsInput value={data.tags || []} handleInput={handleInput} userTags={userData.tags} />
+            <CommentInput value={data.comment} handleInput={handleInput} />
+          </DialogContent>
+
+          <DialogActions>
+            <Button onClick={cancel} color="secondary">
+              Close
+            </Button>
+            <Button onClick={add} color="primary" type="submit">
+              Add
+            </Button>
+          </DialogActions>
+        </form>
+      </Dialog>
+
+      <Dialog
+        open={alertOpen}
+        onClose={() => {
+          setAlertOpen(false);
+        }}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle>
+          <ErrorOutlineOutlinedIcon />
         </DialogTitle>
 
         <DialogContent>
-          {/* <DialogContentText>Всякая хрень</DialogContentText> */}
-
-          <MoneyWaySwitch
-            handleInput={toggleMoneyWay}
-            value={isIncome}
-            label={isIncome ? 'income' : 'outcome'}
-          />
-          <AmountInput handleInput={handleInput} value={data.sum} error={error.sum} />
-          <DateInput handleInput={handleInput} value={data.date} />
-          <CategorySelect
-            error={error.category}
-            value={data.category}
-            handleInput={handleInput}
-            categories={categories[isIncome ? 'income' : 'outcome']}
-          />
-          <TagsInput value={data.tags || []} handleInput={handleInput} userTags={userData.tags} />
-          <CommentInput value={data.comment} handleInput={handleInput} />
+          <DialogContentText>Are you sure you want to delete the transaction?</DialogContentText>
         </DialogContent>
-
         <DialogActions>
-          <Button onClick={cancel} color="secondary">
-            Close
+          <Button
+            onClick={() => {
+              setAlertOpen(false);
+            }}
+            color="primary"
+          >
+            No
           </Button>
-          <Button onClick={add} color="primary" type="submit">
-            Add
+          <Button onClick={confirm} color="primary" autoFocus>
+            Delete
           </Button>
         </DialogActions>
-      </form>
-    </Dialog>
+      </Dialog>
+    </>
   );
 }
