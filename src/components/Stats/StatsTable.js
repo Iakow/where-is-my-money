@@ -67,7 +67,7 @@ const comparator = (prop, desc = true) => (a, b) => {
   return 0 * order;
 };
 
-export default function List({ transactions, categories, userTags, openForm }) {
+export default function StatsTable({ transactions, categories, userTags, openForm }) {
   const classes = useStyles();
 
   const [columns, setColumns] = useState([
