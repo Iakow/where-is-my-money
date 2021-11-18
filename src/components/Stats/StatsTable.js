@@ -36,11 +36,8 @@ const useStyles = makeStyles({
     fontSize: 14,
   },
   list: {
-    maxHeight: '75vh',
     overflowY: 'auto',
-  },
-  body: {
-    /* marginBottom: 30, */
+    height: 'calc(100% - 50px)',
   },
   footer: {
     backgroundColor: '#ededed',

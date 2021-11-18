@@ -1,20 +1,27 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import Diagram from './Diargam';
+import StatsTable from './StatsTable';
+import StatsTimeFilter from './StatsTImeFilter';
+
 import { makeStyles } from '@material-ui/core/styles';
 import TableChartIcon from '@material-ui/icons/TableChart';
 import PieChartIcon from '@material-ui/icons/PieChart';
 import { Tabs, Tab } from '@material-ui/core';
-import List from './List';
-import StatsTimeFilter from './StatsTImeFilter';
-import Diagram from './Diargam';
+import { Paper } from '@material-ui/core';
 
 const useStyles = makeStyles(theme => ({
   main: {
-    display: 'flex',
-    flexDirection: 'column',
-    paddingTop: 150,
+    padding: '10px 0',
+    height: 'calc(100vh - 140px)',
   },
   header: {
     display: 'flex',
+    height: 50,
+  },
+  paper: {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   budgetBtn: {
     display: 'flex',
@@ -23,10 +30,6 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
     height: '150px',
     width: '150px',
-  },
-  chart: {
-    height: 400,
-    width: 400,
   },
 }));
 
@@ -83,33 +86,31 @@ export default function Stats({ userData, openForm }) {
 
   return (
     <main className={classes.main}>
-      <header className={classes.header}>
-        <Tabs value={tabValue} onChange={onTabChange}>
-          <Tab icon={<TableChartIcon />} />
-          <Tab icon={<PieChartIcon />} />
-        </Tabs>
+      <Paper className={classes.paper}>
+        <header className={classes.header}>
+          <Tabs value={tabValue} onChange={onTabChange}>
+            <Tab icon={<TableChartIcon />} />
+            <Tab icon={<PieChartIcon />} />
+          </Tabs>
 
-        <StatsTimeFilter
-          handler={handleFilterChange}
-          filterValue={filters}
-          budgetValue={userData.budget}
-        />
-      </header>
+          <StatsTimeFilter
+            handler={handleFilterChange}
+            filterValue={filters}
+            budgetValue={userData.budget}
+          />
+        </header>
 
-      {tabValue === 0 && (
-        <List
-          transactions={tableData}
-          userTags={userData.tags}
-          categories={userData.categories}
-          openForm={openForm}
-        />
-      )}
+        {tabValue === 0 && (
+          <StatsTable
+            transactions={tableData}
+            userTags={userData.tags}
+            categories={userData.categories}
+            openForm={openForm}
+          />
+        )}
 
-      {tabValue === 1 && (
-        <div className={classes.chart}>
-          <Diagram data={chartData} />
-        </div>
-      )}
+        {tabValue === 1 && <Diagram data={chartData} />}
+      </Paper>
     </main>
   );
 }
