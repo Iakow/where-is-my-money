@@ -12,6 +12,7 @@
     "lint:staged": "npx lint-staged",
     "prebuild": "shx rm -rf dist/*",
     "build": "parcel build src/index.html --public-url ./",
+    "newBuild": "parcel build src/index.html --no-minify --public-url ./",
     "deploy": "gh-pages -d dist"
   },
   "repository": {
