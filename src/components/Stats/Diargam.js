@@ -3,8 +3,8 @@ import { makeStyles, mergeClasses } from '@material-ui/styles';
 
 const useStyles = makeStyles(() => ({
   container: {
-    height: '50vh',
-    width: '100vw',
+    height: '100%',
+    width: '100%',
     display: 'flex',
   },
 }));
@@ -35,7 +35,7 @@ const COLORS = [
 
 const Diagram = ({ data }) => {
   const classes = useStyles();
-  console.log(data.income);
+
   return (
     <div className={classes.container}>
       <ResponsiveContainer width="100%" height="100%">
