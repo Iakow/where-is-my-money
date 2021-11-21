@@ -13,6 +13,10 @@ const useStyles = makeStyles(theme => ({
   main: {
     padding: '10px 0',
     height: 'calc(100vh - 140px)',
+    [theme.breakpoints.down('xs')]: {
+      padding: 0,
+      height: '100vh',
+    },
   },
   header: {
     display: 'flex',

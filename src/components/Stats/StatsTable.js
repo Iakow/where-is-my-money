@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from 'react';
 
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useTheme } from '@material-ui/core/styles';
+
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
+import ChatBubbleOutlineIcon from '@material-ui/icons/ChatBubbleOutline';
 import TableCell from '@material-ui/core/TableCell';
+import ChatIcon from '@material-ui/icons/Chat';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
@@ -22,32 +27,47 @@ import { Badge } from '@material-ui/core';
 import { getDateString } from '../../utils';
 import Filters from './Filters';
 
-const useStyles = makeStyles({
-  outcome: {
-    color: 'red',
-  },
-  income: {
-    color: 'green',
-  },
-  comment: {
-    fontSize: 14,
-  },
-  date: {
-    fontSize: 14,
-  },
-  list: {
-    overflowY: 'auto',
-    height: 'calc(100% - 50px)',
-  },
-  footer: {
-    backgroundColor: '#ededed',
-    height: 50,
-    left: 0,
-    bottom: 0,
-    zIndex: 2,
-    position: 'sticky',
-    fontSize: 20,
-  },
+const useStyles = makeStyles(theme => {
+  console.log('theme:', theme);
+  return {
+    outcome: {
+      color: 'red',
+    },
+    income: {
+      color: 'green',
+    },
+    comment: {
+      fontSize: 14,
+    },
+    date: {
+      fontSize: 14,
+    },
+    list: {
+      overflowY: 'auto',
+      height: 'calc(100% - 50px)',
+    },
+    footer: {
+      backgroundColor: '#ededed',
+      height: 50,
+      left: 0,
+      bottom: 0,
+      zIndex: 2,
+      position: 'sticky',
+      fontSize: 20,
+    },
+    headerCell: {
+      [theme.breakpoints.down('xs')]: {
+        padding: 4,
+        fontSize: 10,
+      },
+    },
+    tag: {
+      margin: 0,
+    },
+    icon: {
+      margin: 0,
+    },
+  };
 });
 
 const comparator = (prop, desc = true) => (a, b) => {
@@ -66,6 +86,9 @@ const comparator = (prop, desc = true) => (a, b) => {
 
 export default function StatsTable({ transactions, categories, userTags, openForm }) {
   const classes = useStyles();
+  const theme = useTheme();
+  const isXS = useMediaQuery(theme.breakpoints.down('xs'));
+  console.log(isXS);
 
   const [columns, setColumns] = useState([
     { name: 'Date', sortable: true, active: true },
@@ -159,8 +182,13 @@ export default function StatsTable({ transactions, categories, userTags, openFor
               {columns.map((column, index) => {
                 if (column.sortable) {
                   return (
-                    <TableCell key={column.name} align={column.numeric ? 'right' : 'inherit'}>
+                    <TableCell
+                      classes={{ sizeSmall: classes.headerCell }}
+                      key={column.name}
+                      align={column.numeric ? 'right' : 'inherit'}
+                    >
                       <TableSortLabel
+                        classes={{ icon: classes.icon }}
                         active={column.active}
                         direction={column.order}
                         onClick={onSortClick(index)}
@@ -171,7 +199,11 @@ export default function StatsTable({ transactions, categories, userTags, openFor
                   );
                 } else {
                   return (
-                    <TableCell key={column.name} align="right">
+                    <TableCell
+                      key={column.name}
+                      align="right"
+                      classes={{ sizeSmall: classes.headerCell }}
+                    >
                       <Tooltip title="Filter list">
                         <IconButton aria-label="filter list" onClick={handleClick}>
                           <Badge
@@ -215,23 +247,30 @@ export default function StatsTable({ transactions, categories, userTags, openFor
 
                 return (
                   <TableRow hover={true} key={id} id={id}>
-                    <TableCell className={classes.date}>
+                    <TableCell className={classes.date} classes={{ sizeSmall: classes.headerCell }}>
                       {new Date(date).toLocaleString()}
                     </TableCell>
 
-                    <TableCell align="right" className={classes[categoryGroup]}>
+                    <TableCell
+                      align="right"
+                      className={classes[categoryGroup]}
+                      classes={{ sizeSmall: classes.headerCell }}
+                    >
                       {sum}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell classes={{ sizeSmall: classes.headerCell }}>
                       <FastfoodIcon fontSize="small" />
-                      {categories[categoryGroup][category]}
+                      {!isXS && categories[categoryGroup][category]}
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell classes={{ sizeSmall: classes.headerCell }} align={'center'}>
                       {tags // TODO: won't need after release
                         ? tags.map(tag =>
                             userTags[tag] ? (
+                              <p className={classes.tag}>
+                                #{userTags[tag]}
+                              </p> /* (
                               <Chip
                                 key={tag}
                                 label={userTags[tag]}
@@ -239,14 +278,20 @@ export default function StatsTable({ transactions, categories, userTags, openFor
                                 color="primary"
                                 variant="outlined"
                               />
+                            ) */
                             ) : null,
                           )
                         : null}
                     </TableCell>
 
-                    <TableCell className={classes.comment}>{comment}</TableCell>
+                    <TableCell
+                      className={classes.comment}
+                      classes={{ sizeSmall: classes.headerCell }}
+                    >
+                      {comment ? isXS ? <ChatBubbleOutlineIcon /> : comment : null}
+                    </TableCell>
 
-                    <TableCell align="right">
+                    <TableCell align="right" classes={{ sizeSmall: classes.headerCell }}>
                       <IconButton
                         aria-label="filter list"
                         onClick={e => {
