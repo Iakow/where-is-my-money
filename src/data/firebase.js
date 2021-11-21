@@ -105,7 +105,7 @@ export function useFirebase() {
 
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
-        //email = user.email;
+        email = user.email;
         userDBRef = firebase.firestore().collection('users').doc(user.uid);
 
         // 1. Получаем юзердок

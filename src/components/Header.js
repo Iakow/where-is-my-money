@@ -50,7 +50,7 @@ export default function Header({ userData, openForm }) {
         </IconButton>
       </AppBar>
 
-      <UserSettings open={settingsIsOpen} onClose={closeSettings} />
+      <UserSettings open={settingsIsOpen} onClose={closeSettings} tags={userData.tags} />
     </>
   );
 }
