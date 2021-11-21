@@ -1,27 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { getHTMLDate } from '../../utils';
-import styles from '../../style';
+import TextField from '@material-ui/core/TextField';
 
-export default function DateInput({ value, handler }) {
-  const [date, setDate] = useState(value);
-
-  const handleInput = ({ target }) => {
-    setDate(new Date(target.value).getTime());
-  };
-
-  const upData = () => {
-    handler('date', date);
-  };
-
+export default function DateInput({ value, handleInput }) {
   return (
-    <input
-      className={styles['transaction-form_input']}
+    <TextField
+      id="date"
+      label="Date"
       name="date"
       type="datetime-local"
-      placeholder="date"
-      value={getHTMLDate(date)}
-      onChange={handleInput}
-      onBlur={upData}
+      value={getHTMLDate(value)}
+      onChange={({ target }) => {
+        handleInput(target.name, new Date(target.value).getTime());
+      }}
+      fullWidth
+      variant="outlined"
     />
   );
 }
