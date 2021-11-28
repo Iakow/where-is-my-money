@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Stats({ userData, openForm }) {
+export function Stats({ userData, openForm }) {
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
 

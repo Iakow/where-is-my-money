@@ -11,7 +11,7 @@ import { Button } from '@material-ui/core';
 import MenuItem from '@material-ui/core/MenuItem';
 import { TextField } from '@material-ui/core';
 import { getHTMLDate } from '../../utils';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core';
 import { SignalCellularNull } from '@material-ui/icons';
 
 const useStyles = makeStyles({

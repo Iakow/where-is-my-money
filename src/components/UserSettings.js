@@ -52,7 +52,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function UserSettings({ open, onClose, tags }) {
+export function UserSettings({ open, onClose, tags }) {
   const classes = useStyles();
   const [tab, setTab] = useState(0);
   const [editableTag, setEditableTag] = useState('');

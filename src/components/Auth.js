@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { signin, register } from '../data/firebase';
 
-import styles from '../style';
+import styles from '../style.css'
 
-export default function Auth() {
+
+export function Auth() {
   const [authType, setAuthType] = useState('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

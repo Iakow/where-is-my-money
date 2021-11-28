@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function TransactionForm({ isOpen, onClose, currentTransactionID, userData }) {
+export function TransactionForm({ isOpen, onClose, currentTransactionID, userData }) {
   const classes = useStyles();
 
   const [alertOpen, setAlertOpen] = useState(false);

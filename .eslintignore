@@ -1,9 +1,0 @@
-/.git
-/.vscode
-/.idea
-/.cache
-/.history
-/dist
-node_modules
-.DS_Store
-DS_Store?

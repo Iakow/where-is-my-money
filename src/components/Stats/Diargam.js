@@ -1,11 +1,11 @@
-import React from 'react';
-import { makeStyles, mergeClasses } from '@material-ui/styles';
+import React from "react";
+import { makeStyles, mergeClasses } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
   container: {
-    height: '100%',
-    width: '100%',
-    display: 'flex',
+    height: "100%",
+    width: "100%",
+    display: "flex",
   },
 }));
 import {
@@ -20,20 +20,20 @@ import {
   Legend,
   BarChart,
   Bar,
-} from 'recharts';
+} from "recharts";
 
 const COLORS = [
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
-  '#0088FE',
-  '#00C49F',
-  '#FFBB28',
-  '#FF8042',
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
 ];
 
-const Diagram = ({ data }) => {
+export function Diagram({ data }) {
   const classes = useStyles();
 
   return (
@@ -52,7 +52,10 @@ const Diagram = ({ data }) => {
             label
           >
             {data.outcome.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip />
@@ -78,6 +81,4 @@ const Diagram = ({ data }) => {
       </ResponsiveContainer>
     </div>
   );
-};
-
-export default Diagram;
+}

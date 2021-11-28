@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import IconButton from '@material-ui/core/IconButton';
-import AlarmAddIcon from '@material-ui/icons/AlarmAdd';
-import SettingsIcon from '@material-ui/icons/Settings';
-import Form from './Form';
-import Chart from './Chart';
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import IconButton from "@material-ui/core/IconButton";
+import AlarmAddIcon from "@material-ui/icons/AlarmAdd";
+import SettingsIcon from "@material-ui/icons/Settings";
+import Form from "./Form";
+import Chart from "./Chart";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   budgetBtn: {
-    color: 'gainsboro',
+    color: "gainsboro",
   },
   desktop: {
     // TODO
@@ -21,17 +21,17 @@ const useStyles = makeStyles(theme => ({
   },
 
   balance: {
-    display: 'flex',
-    justifyContent: 'center',
+    display: "flex",
+    justifyContent: "center",
   },
   budget: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 }));
 
-const Budget = ({ userData, type }) => {
+export function Budget({ userData, type }) {
   const classes = useStyles();
   const [popupIsOpen, setPopupIsOpen] = useState(false);
   const { budget, balance } = userData;
@@ -63,6 +63,4 @@ const Budget = ({ userData, type }) => {
       <Form isOpen={popupIsOpen} close={colseForm} value={budget} />
     </div>
   );
-};
-
-export default Budget;
+}

@@ -7,7 +7,7 @@ import {
 
 import styles from '../style.css'; // вот это уйдет тоже
 
-export default function SetBalanceForm(params) {
+export function SetBalanceForm(params) {
   return (
     <form
       className={styles.initialForm}
