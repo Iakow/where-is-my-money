@@ -1,26 +1,22 @@
-import React from 'react';
-import {
-  // вот этой всей фигни быть не должно по идее
-  initializeUserDB,
-  email, // а вот это вообще должно быть в userData
-} from '../data/firebase';
+import React from "react";
+import { email, setBalance } from "../data/firebase";
 
-import styles from '../style.css'; // вот это уйдет тоже
+import styles from "../style.css";
 
-export function SetBalanceForm(params) {
+export function SetBalanceForm() {
+  const handleBalance = (e) => {
+    e.preventDefault();
+    setBalance(+e.target.sum.value);
+  };
+
   return (
-    <form
-      className={styles.initialForm}
-      onSubmit={e => {
-        e.preventDefault();
-
-        initializeUserDB(+e.target.sum.value);
-      }}
-    >
-      <p className={styles['initialForm_auth-message']}>Wellcome {email}!</p>
-      <p className={styles['initialForm_input-message']}>Now, set your current balance please</p>
+    <form className={styles.initialForm} onSubmit={handleBalance}>
+      <p className={styles["initialForm_auth-message"]}>Wellcome {email}!</p>
+      <p className={styles["initialForm_input-message"]}>
+        Now, set your current balance please
+      </p>
       <input
-        className={styles['initialForm_input']}
+        className={styles["initialForm_input"]}
         type="number"
         placeholder="sum"
         autoFocus
@@ -28,7 +24,11 @@ export function SetBalanceForm(params) {
         min="1"
         required
       />
-      <input className={styles['initialForm_submit']} type="submit" value="Send" />
+      <input
+        className={styles["initialForm_submit"]}
+        type="submit"
+        value="Send"
+      />
     </form>
   );
 }

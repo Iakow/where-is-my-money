@@ -102,7 +102,7 @@ export function App() {
     return <Auth />;
   }
 
-  if (userData === null) {
+  if (userData.transactions.balance === null) {
     // лучше завести флаг userData.initialized?
     console.log("App-set-balance");
     //TODO: try to put it in Auth
