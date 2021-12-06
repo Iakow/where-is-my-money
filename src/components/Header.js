@@ -24,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function Header({ userData, openForm }) {
+export function Header({ userData, openTransactionForm }) {
   const classes = useStyles();
   const [settingsIsOpen, setSettingsIsOpen] = useState(false);
 
@@ -45,7 +45,7 @@ export function Header({ userData, openForm }) {
 
         <Budget userData={userData} type="desktop" />
 
-        <IconButton className={classes.addButton} onClick={() => openForm()}>
+        <IconButton className={classes.addButton} onClick={() => openTransactionForm()}>
           <AddCircleIcon fontSize="large" />
         </IconButton>
       </AppBar>

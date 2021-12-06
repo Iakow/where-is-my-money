@@ -88,7 +88,7 @@ export default function StatsTable({
   transactions,
   categories,
   userTags,
-  openForm,
+  openTransactionForm,
 }) {
   const classes = useStyles();
   const theme = useTheme();
@@ -334,7 +334,7 @@ export default function StatsTable({
                       <IconButton
                         aria-label="filter list"
                         onClick={(e) => {
-                          openForm(id);
+                          openTransactionForm(id);
                         }}
                       >
                         <EditIcon />

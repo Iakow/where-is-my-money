@@ -9,6 +9,17 @@ import Chart from "./Chart";
 const useStyles = makeStyles((theme) => ({
   budgetBtn: {
     color: "gainsboro",
+    [theme.breakpoints.down("xs")]: {
+      position: "absolute",
+      top: "20%",
+      opacity: "0.1"
+    },
+  },
+  root: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
   },
   desktop: {
     // TODO
@@ -16,22 +27,32 @@ const useStyles = makeStyles((theme) => ({
     width: 300,
   },
   mobile: {
-    height: 600,
-    width: 400,
+    height: "100vw",
+    width: "100vw",
   },
-
   balance: {
     display: "flex",
     justifyContent: "center",
+    [theme.breakpoints.down("xs")]: {
+      fontSize: 46,
+      position: "absolute",
+      /* fontWeight: "bold", */
+      color: "#71D28D",
+    },
   },
   budget: {
     display: "flex",
+    position: "relative",
     alignItems: "center",
     justifyContent: "center",
+    [theme.breakpoints.down("xs")]: {
+      flexDirection: "column",
+    },
   },
 }));
 
 export function Budget({ userData, type }) {
+  // type надо как-то через тему, наверное
   const classes = useStyles();
   const [popupIsOpen, setPopupIsOpen] = useState(false);
   const { budget, balance } = userData;
@@ -44,9 +65,11 @@ export function Budget({ userData, type }) {
     setPopupIsOpen(false);
   };
 
+  const balanceText = type === "desktop" ? "BALANCE: " : "";
+
   return (
-    <div>
-      <span className={classes.balance}>{`BALANCE: ${balance}`}</span>
+    <div className={classes.root}>
+      <span className={classes.balance}>{balanceText + balance}</span>
 
       <div className={classes.budget}>
         {budget && (

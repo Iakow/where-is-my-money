@@ -8,7 +8,7 @@ export default function AmountInput({ value, handleInput, error }) {
       helperText={error && 'The amount must be greater than zero'}
       required
       inputProps={{ min: 1 }}
-      autoFocus
+      /* autoFocus */
       type="number"
       name="sum"
       margin="normal"

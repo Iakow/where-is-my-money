@@ -15,7 +15,8 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100vh - 140px)",
     [theme.breakpoints.down("xs")]: {
       padding: 0,
-      height: "100vh",
+      height: "96vh",
+      width: "100%",
     },
   },
   header: {
@@ -37,7 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function Stats({ userData, openForm }) {
+export function Stats({ userData, openTransactionForm }) {
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
 
@@ -115,7 +116,7 @@ export function Stats({ userData, openForm }) {
             transactions={tableData}
             userTags={userData.tags}
             categories={userData.categories}
-            openForm={openForm}
+            openTransactionForm={openTransactionForm}
           />
         )}
 

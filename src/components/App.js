@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import { useFirebase } from "../data/firebase";
 
-import { makeStyles, useTheme } from "@material-ui/core/styles";
-import { CssBaseline } from "@material-ui/core";
+import {
+  makeStyles,
+  useTheme,
+  createTheme,
+  ThemeProvider,
+} from "@material-ui/core/styles";
+import { CssBaseline, CircularProgress } from "@material-ui/core";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import { CircularProgress } from "@material-ui/core";
 
 import { Auth } from "./Auth";
 import { TransactionForm } from "./TransactionForm/TransactionForm";
@@ -13,7 +17,6 @@ import { Desktop } from "./Desktop";
 import { Mobile } from "./Mobile";
 
 const useStyles = makeStyles((theme) => {
-  console.log(theme);
   return {
     loader: {
       display: "flex",
@@ -24,7 +27,7 @@ const useStyles = makeStyles((theme) => {
     app: {
       // без этого слетает листнер на ресайз !!!
       [theme.breakpoints.down("xs")]: {
-        display: "block",
+        height: "100vh",
       },
     },
   };
@@ -36,6 +39,7 @@ export function App() {
   const isXS = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true });
 
   const { isResponseWaiting, userData, isAuth } = useFirebase();
+
   const [transactionForm, setTransactionForm] = useState({
     isOpen: false,
     transactionID: null,
@@ -66,25 +70,36 @@ export function App() {
     return <SetBalanceForm />;
   }
 
+  const darkTheme = createTheme({
+    palette: {
+      type: "dark",
+    },
+  });
+
   return (
-    <div className={classes.app}>
-      <CssBaseline />
+    <ThemeProvider theme={darkTheme}>
+      <div className={classes.app}>
+        <CssBaseline />
 
-      {isXS ? (
-        <Mobile userData={userData} openTransactionForm={openTransactionForm} />
-      ) : (
-        <Desktop
+        {isXS ? (
+          <Mobile
+            userData={userData}
+            openTransactionForm={openTransactionForm}
+          />
+        ) : (
+          <Desktop
+            userData={userData}
+            openTransactionForm={openTransactionForm}
+          />
+        )}
+
+        <TransactionForm
+          isOpen={transactionForm.isOpen}
+          onClose={closeForm}
           userData={userData}
-          openTransactionForm={openTransactionForm}
+          currentTransactionID={transactionForm.transactionID}
         />
-      )}
-
-      <TransactionForm
-        isOpen={transactionForm.isOpen}
-        onClose={closeForm}
-        userData={userData}
-        currentTransactionID={transactionForm.transactionID}
-      />
-    </div>
+      </div>
+    </ThemeProvider>
   );
 }
