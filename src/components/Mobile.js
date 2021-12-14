@@ -2,10 +2,10 @@ import { Routes, Route, Link } from "react-router-dom";
 
 import { Budget } from "./Budget/Budget";
 import { Stats } from "./Stats/Stats";
-
-import { makeStyles, Fab } from "@material-ui/core";
-import BarChartIcon from "@material-ui/icons/BarChart";
 import { AddButton } from "./AddButton";
+
+import { makeStyles } from "@material-ui/core";
+import BarChartIcon from "@material-ui/icons/BarChart";
 
 const useStyles = makeStyles((theme) => ({
   mobileContainer: {
@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function Mobile({ userData, openTransactionForm }) {
+export function Mobile({ openTransactionForm }) {
   const classes = useStyles();
 
   return (
@@ -45,11 +45,11 @@ export function Mobile({ userData, openTransactionForm }) {
           path="/"
           element={
             <>
-              <Budget userData={userData} type="mobile" />
+              <Budget type="mobile" />
 
               <Link to="/stats">
                 <BarChartIcon
-                  fontSize="large"
+                  fontSize="large" /* ????????????????????????????????????????? */
                   classes={{ fontSizeLarge: classes.statsBtn }}
                 />
               </Link>
@@ -66,11 +66,7 @@ export function Mobile({ userData, openTransactionForm }) {
           path="/stats"
           element={
             <>
-              <Stats
-                type="mobile"
-                userData={userData}
-                openTransactionForm={openTransactionForm}
-              />
+              <Stats type="mobile" openTransactionForm={openTransactionForm} />
 
               <AddButton
                 handler={openTransactionForm}

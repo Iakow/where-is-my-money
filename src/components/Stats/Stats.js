@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useContext } from "react";
+import { UserDataContext } from "../UserDataContext";
+import { Link } from "react-router-dom";
 import { Diagram } from "./Diargam";
 import StatsTable from "./StatsTable";
 import StatsTimeFilter from "./StatsTImeFilter";
@@ -7,7 +9,10 @@ import { makeStyles } from "@material-ui/core/styles";
 import TableChartIcon from "@material-ui/icons/TableChart";
 import PieChartIcon from "@material-ui/icons/PieChart";
 import { Tabs, Tab } from "@material-ui/core";
+import ReplyIcon from "@material-ui/icons/Reply";
 import { Paper } from "@material-ui/core";
+import { ButtonBase } from "@material-ui/core";
+import { UserDataContext } from "../UserDataContext";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -15,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
     height: "calc(100vh - 140px)",
     [theme.breakpoints.down("xs")]: {
       padding: 0,
-      height: "96vh",
+      height: "100%",
       width: "100%",
     },
   },
@@ -27,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
     height: "100%",
     display: "flex",
     flexDirection: "column",
+    backgroundColor: "transparent",
   },
   budgetBtn: {
     display: "flex",
@@ -36,9 +42,16 @@ const useStyles = makeStyles((theme) => ({
     height: "150px",
     width: "150px",
   },
+  navBtn: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    width: 100,
+  },
 }));
 
-export function Stats({ userData, openTransactionForm }) {
+export function Stats({ openTransactionForm, type }) {
+  const userData = useContext(UserDataContext);
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
 
@@ -94,6 +107,41 @@ export function Stats({ userData, openTransactionForm }) {
     () => calculateStatsData(userData.transactions),
     [userData.transactions, filters]
   );
+
+  if (type === "mobile")
+    return (
+      <main className={classes.main}>
+        <Paper className={classes.paper}>
+          <header className={classes.header}>
+            <Link className={classes.navBtn} to="/">
+              <ReplyIcon color="action" />
+            </Link>
+            <StatsTimeFilter
+              handler={handleFilterChange}
+              filterValue={filters}
+              budgetValue={userData.budget}
+            />
+          </header>
+
+          {tabValue === 0 && (
+            <StatsTable
+              transactions={tableData}
+              userTags={userData.tags}
+              categories={userData.categories}
+              openTransactionForm={openTransactionForm}
+            />
+          )}
+
+          {tabValue === 1 && <Diagram data={chartData} />}
+
+          <Tabs variant="fullWidth" value={tabValue} onChange={onTabChange}>
+            {/* <Tab icon={<ReplyIcon />} /> */}
+            <Tab icon={<TableChartIcon />} />
+            <Tab icon={<PieChartIcon />} />
+          </Tabs>
+        </Paper>
+      </main>
+    );
 
   return (
     <main className={classes.main}>
