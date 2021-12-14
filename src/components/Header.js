@@ -3,9 +3,9 @@ import { Budget } from "./Budget/Budget.js";
 import { UserSettings } from "./UserSettings.js";
 
 import MenuIcon from "@material-ui/icons/Menu";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
 import { AppBar, IconButton } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+import { AddButton } from "./AddButton.js";
 
 const useStyles = makeStyles((theme) => ({
   bar: {
@@ -17,7 +17,6 @@ const useStyles = makeStyles((theme) => ({
   addButton: {
     position: "relative",
     top: 60,
-    color: "#f098ff",
   },
   settingsButton: {
     color: "white",
@@ -44,10 +43,11 @@ export function Header({ userData, openTransactionForm }) {
         </IconButton>
 
         <Budget userData={userData} type="desktop" />
-
-        <IconButton className={classes.addButton} onClick={() => openTransactionForm()}>
-          <AddCircleIcon fontSize="large" />
-        </IconButton>
+        
+        <AddButton
+          className={classes.addButton}
+          handler={openTransactionForm}
+        />
       </AppBar>
 
       <UserSettings

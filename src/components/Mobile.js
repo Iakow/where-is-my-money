@@ -1,47 +1,45 @@
 import { Routes, Route, Link } from "react-router-dom";
+
 import { Budget } from "./Budget/Budget";
 import { Stats } from "./Stats/Stats";
-import DonutLargeIcon from "@material-ui/icons/DonutLarge";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
-import { makeStyles } from "@material-ui/core";
-import { IconButton } from "@material-ui/core";
+
+import { makeStyles, Fab } from "@material-ui/core";
+import BarChartIcon from "@material-ui/icons/BarChart";
+import { AddButton } from "./AddButton";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    height: "100%",
-    width: "100%",
+  mobileContainer: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "space-around",
+    height: "100%",
+    width: "100%",
   },
-  addButton: {
-    fontSize: "4rem",
-    color: "#40D1FF",
-    boxShadow: theme.shadows[14],
-    borderRadius: "50%",
+  bottomButton: {
+    marginBottom: 30,
   },
   stickyButton: {
-    [theme.breakpoints.down("xs")]: {
-      position: "absolute",
-      bottom: 44,
-      right: 24,
-      zIndex: 1299,
-    },
+    position: "absolute",
+    bottom: 44,
+    right: 24,
+    zIndex: 1299,
   },
   statsBtn: {
-    fontSize: "2rem",
     color: "#40D1FF",
     boxShadow: theme.shadows[5],
     borderRadius: "50%",
-    height: 32,
+    padding: 6,
+    height: 40,
+    width: 40,
   },
 }));
 
 export function Mobile({ userData, openTransactionForm }) {
   const classes = useStyles();
+
   return (
-    <div className={classes.root}>
+    <div className={classes.mobileContainer}>
       <Routes>
         <Route
           path="/"
@@ -49,19 +47,17 @@ export function Mobile({ userData, openTransactionForm }) {
             <>
               <Budget userData={userData} type="mobile" />
 
-              <Link to="/stats" className={classes.statsBtn}>
-                <DonutLargeIcon
+              <Link to="/stats">
+                <BarChartIcon
                   fontSize="large"
                   classes={{ fontSizeLarge: classes.statsBtn }}
                 />
               </Link>
 
-              <IconButton onClick={() => openTransactionForm()}>
-                <AddCircleIcon
-                  fontSize="large"
-                  classes={{ fontSizeLarge: classes.addButton }}
-                />
-              </IconButton>
+              <AddButton
+                handler={openTransactionForm}
+                className={classes.bottomButton}
+              />
             </>
           }
         />
@@ -71,20 +67,15 @@ export function Mobile({ userData, openTransactionForm }) {
           element={
             <>
               <Stats
+                type="mobile"
                 userData={userData}
                 openTransactionForm={openTransactionForm}
               />
-              <IconButton
-                className={classes.stickyButton}
-                onClick={() => openTransactionForm()}
-              >
-                <AddCircleIcon
-                  fontSize="large"
-                  classes={{ fontSizeLarge: classes.addButton }}
-                />
-              </IconButton>
 
-              <Link to="/">Main</Link>
+              <AddButton
+                handler={openTransactionForm}
+                className={classes.stickyButton}
+              />
             </>
           }
         />
