@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import AmountInput from './AmountInput';
-import DateInput from './DateInput';
-import TagsInput from './TagsInput';
-import MoneyWaySwitch from './MoneyWaySwitch';
-import CategorySelect from './CategorySelect';
-import CommentInput from './CommentInput';
-import { editTransaction, addNewTransaction } from '../../data/firebase';
-import IconButton from '@material-ui/core/IconButton';
-import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
-import { removeTransaction } from '../../data/firebase';
-import ErrorOutlineOutlinedIcon from '@material-ui/icons/ErrorOutlineOutlined';
+import React, { useEffect, useState, useContext } from "react";
+import { UserDataContext } from "../UserDataContext";
+import AmountInput from "./AmountInput";
+import DateInput from "./DateInput";
+import TagsInput from "./TagsInput";
+import MoneyWaySwitch from "./MoneyWaySwitch";
+import CategorySelect from "./CategorySelect";
+import CommentInput from "./CommentInput";
+import { editTransaction, addNewTransaction } from "../../data/firebase";
+import IconButton from "@material-ui/core/IconButton";
+import DeleteForeverIcon from "@material-ui/icons/DeleteForever";
+import { removeTransaction } from "../../data/firebase";
+import ErrorOutlineOutlinedIcon from "@material-ui/icons/ErrorOutlineOutlined";
 import {
   Dialog,
   DialogActions,
@@ -17,24 +18,25 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
-} from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+} from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
-    '& .MuiTextField-root': {
+    "& .MuiTextField-root": {
       marginBottom: theme.spacing(3),
       /* width: '25ch', */
     },
-    '& .MuiTypography-root': {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+    "& .MuiTypography-root": {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
     },
   },
 }));
 
-export function TransactionForm({ isOpen, onClose, currentTransactionID, userData }) {
+export function TransactionForm({ isOpen, onClose, currentTransactionID }) {
+  const userData = useContext(UserDataContext);
   const classes = useStyles();
 
   const [alertOpen, setAlertOpen] = useState(false);
@@ -43,9 +45,9 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
   const initialFormValue = {
     date: Date.now(),
     sum: 0,
-    category: '',
+    category: "",
     tags: [], // как-то тупо. Почему не null?
-    comment: '',
+    comment: "",
   };
 
   const transaction = userData.transactions
@@ -55,11 +57,11 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
   const categories = userData.categories;
 
   const [data, setData] = useState(
-    currentTransactionID ? { ...transaction } : { ...initialFormValue },
+    currentTransactionID ? { ...transaction } : { ...initialFormValue }
   );
 
   const [isIncome, setIsIncome] = useState(
-    transaction ? (transaction.sum > 0 ? true : false) : false,
+    transaction ? (transaction.sum > 0 ? true : false) : false
   );
 
   const [error, setError] = useState({ sum: false, category: false });
@@ -73,10 +75,10 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
   }, [isOpen]);
 
   const handleInput = (name, value) => {
-    setData(data => {
+    setData((data) => {
       const newData = { ...data };
 
-      if (name == 'sum') value = isIncome === true ? +value : -value;
+      if (name == "sum") value = isIncome === true ? +value : -value;
       newData[name] = value;
       return newData;
     });
@@ -84,13 +86,13 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
 
   const toggleMoneyWay = () => {
     // странно, что это отдельно от остальных полей
-    setIsIncome(isIncome => !isIncome);
+    setIsIncome((isIncome) => !isIncome);
 
-    setData(data => {
+    setData((data) => {
       const newData = { ...data };
 
       newData.sum *= -1;
-      newData.category = ''; // ????????????
+      newData.category = ""; // ????????????
       return newData;
     });
   };
@@ -113,22 +115,22 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
     cancel();
   };
 
-  const add = e => {
+  const add = (e) => {
     e.preventDefault();
 
     //TODO: вынести валидацию в функцию
     if (data.sum === 0) {
-      setError(oldError => ({ ...oldError, sum: true }));
+      setError((oldError) => ({ ...oldError, sum: true }));
       return;
     } else {
-      setError(oldError => ({ ...oldError, sum: false })); // Зачем эта ветка? Чтобы сбросить старый стейт?
+      setError((oldError) => ({ ...oldError, sum: false })); // Зачем эта ветка? Чтобы сбросить старый стейт?
     }
 
-    if (data.category === '') {
-      setError(oldError => ({ ...oldError, category: true }));
+    if (data.category === "") {
+      setError((oldError) => ({ ...oldError, category: true }));
       return;
     } else {
-      setError(oldError => ({ ...oldError, category: false }));
+      setError((oldError) => ({ ...oldError, category: false }));
     }
 
     if (currentTransactionID) {
@@ -145,9 +147,13 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
       <Dialog open={isOpen} onClose={cancel} transitionDuration={{ exit: 0 }}>
         <form className={classes.root}>
           <DialogTitle className={classes.title}>
-            {currentTransactionID ? 'Edit transaction' : 'Add new transaction'}
+            {currentTransactionID ? "Edit transaction" : "Add new transaction"}
             {currentTransactionID && (
-              <IconButton aria-label="filter list" onClick={del} fontSize="large">
+              <IconButton
+                aria-label="filter list"
+                onClick={del}
+                fontSize="large"
+              >
                 <DeleteForeverIcon color="secondary" />
               </IconButton>
             )}
@@ -159,17 +165,25 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
             <MoneyWaySwitch
               handleInput={toggleMoneyWay}
               value={isIncome}
-              label={isIncome ? 'income' : 'outcome'}
+              label={isIncome ? "income" : "outcome"}
             />
-            <AmountInput handleInput={handleInput} value={data.sum} error={error.sum} />
+            <AmountInput
+              handleInput={handleInput}
+              value={data.sum}
+              error={error.sum}
+            />
             <DateInput handleInput={handleInput} value={data.date} />
             <CategorySelect
               error={error.category}
               value={data.category}
               handleInput={handleInput}
-              categories={categories[isIncome ? 'income' : 'outcome']}
+              categories={categories[isIncome ? "income" : "outcome"]}
             />
-            <TagsInput value={data.tags || []} handleInput={handleInput} userTags={userData.tags} />
+            <TagsInput
+              value={data.tags || []}
+              handleInput={handleInput}
+              userTags={userData.tags}
+            />
             <CommentInput value={data.comment} handleInput={handleInput} />
           </DialogContent>
 
@@ -197,7 +211,9 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID, userDat
         </DialogTitle>
 
         <DialogContent>
-          <DialogContentText>Are you sure you want to delete the transaction?</DialogContentText>
+          <DialogContentText>
+            Are you sure you want to delete the transaction?
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button

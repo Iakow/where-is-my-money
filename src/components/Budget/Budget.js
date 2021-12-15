@@ -119,7 +119,7 @@ export function Budget({ type }) {
 
       <div className={classes.visualization}>
         <div className={budget ? classes[type] : null}>
-          <Chart userData={userData} type={type} />
+          <Chart type={type} />
         </div>
 
         <IconButton className={classes.budgetBtn} onClick={openForm}>
@@ -129,11 +129,7 @@ export function Budget({ type }) {
 
       <Form isOpen={popupIsOpen} close={colseForm} value={budget} />
 
-      <UserSettings
-        open={settingsIsOpen}
-        onClose={closeSettings}
-        tags={userData.tags}
-      />
+      <UserSettings open={settingsIsOpen} onClose={closeSettings} />
     </div>
   );
 }

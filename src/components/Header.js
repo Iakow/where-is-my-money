@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export function Header({ userData, openTransactionForm }) {
+export function Header({  openTransactionForm }) {
   const classes = useStyles();
   const [settingsIsOpen, setSettingsIsOpen] = useState(false);
 
@@ -42,8 +42,8 @@ export function Header({ userData, openTransactionForm }) {
           <MenuIcon />
         </IconButton>
 
-        <Budget userData={userData} type="desktop" />
-        
+        <Budget type="desktop" />
+
         <AddButton
           className={classes.addButton}
           handler={openTransactionForm}
@@ -53,7 +53,6 @@ export function Header({ userData, openTransactionForm }) {
       <UserSettings
         open={settingsIsOpen}
         onClose={closeSettings}
-        tags={userData.tags}
       />
     </>
   );

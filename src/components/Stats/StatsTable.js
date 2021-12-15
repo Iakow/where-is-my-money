@@ -28,22 +28,49 @@ import { Badge } from "@material-ui/core";
 import { getDateString } from "../../utils";
 import Filters from "./Filters";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
+  headerCell: {
+    [theme.breakpoints.down("xs")]: {
+      padding: 4,
+      fontSize: 10,
+      borderBottom: "6px solid #0000003d;",
+    },
+  },
+  newHeaderCell: {
+    [theme.breakpoints.down("xs")]: {
+      padding: 0,
+      fontSize: 10,
+      borderBottom: "6px solid #0000003d;",
+      color: "#40D1FF",
+      backgroundColor: "#101010",
+    },
+  },
   outcome: {
-    color: "red",
+    color: "#ff6060",
+    fontSize: 15,
+    // fontWeight: "bold"
+    paddingLeft: 10,
   },
   income: {
-    color: "green",
+    color: "#71D28D",
+    fontSize: 15,
+    // fontWeight: "bold"
+    paddingLeft: 5,
   },
   comment: {
     fontSize: 14,
   },
   date: {
     fontSize: 14,
+    [theme.breakpoints.down("xs")]: {
+      // padding: 4,
+      fontSize: 10,
+    },
   },
   list: {
     overflowY: "auto",
-    height: "calc(100% - 50px)",
+    /* height: "calc(100% - 50px)", */
+    backgroundColor: "transparent",
   },
   footer: {
     backgroundColor: "#ededed",
@@ -54,17 +81,14 @@ const useStyles = makeStyles(theme => ({
     position: "sticky",
     fontSize: 20,
   },
-  headerCell: {
-      [theme.breakpoints.down("xs")]: {
-        padding: 4,
-        fontSize: 10,
-      },
-    },
   tag: {
     margin: 0,
   },
   icon: {
     margin: 0,
+  },
+  solrtLabel: {
+    color: "#40D1FF",
   },
 }));
 
@@ -93,14 +117,10 @@ export default function StatsTable({
   const classes = useStyles();
   const theme = useTheme();
   const isXS = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true });
-  // const isXS = useMediaQuery("(max-width: 640px)", { noSsr: true });
-  console.log("mathcesTable :", isXS);
-
-  // const isXS = false;
 
   const [columns, setColumns] = useState([
     { name: "Date", sortable: true, active: true },
-    { name: "Sum", sortable: true, active: false, numeric: true },
+    { name: "Sum", sortable: true, active: false /* numeric: true */ },
     { name: "Category", sortable: true, active: false },
     { name: "Tags", sortable: true, active: false },
     { name: "Comment", sortable: true, active: false },
@@ -201,12 +221,16 @@ export default function StatsTable({
                 if (column.sortable) {
                   return (
                     <TableCell
-                      classes={{ sizeSmall: classes.headerCell }}
+                      classes={{ sizeSmall: classes.newHeaderCell }}
                       key={column.name}
                       align={column.numeric ? "right" : "inherit"}
                     >
                       <TableSortLabel
-                        classes={{ icon: classes.icon }}
+                        className={classes.solrtLabel}
+                        classes={{
+                          icon: classes.icon,
+                          active: classes.solrtLabel,
+                        }}
                         active={column.active}
                         direction={column.order}
                         onClick={onSortClick(index)}
@@ -220,7 +244,7 @@ export default function StatsTable({
                     <TableCell
                       key={column.name}
                       align="right"
-                      classes={{ sizeSmall: classes.headerCell }}
+                      classes={{ sizeSmall: classes.newHeaderCell }}
                     >
                       <Tooltip title="Filter list">
                         <IconButton
@@ -295,7 +319,7 @@ export default function StatsTable({
                       classes={{ sizeSmall: classes.headerCell }}
                       align={"center"}
                     >
-                      {tags // TODO: won't need after release
+                      {tags // TODO: won't need after release???
                         ? tags.map((tag) =>
                             userTags[tag] ? (
                               <p className={classes.tag} key={tag}>
@@ -339,23 +363,11 @@ export default function StatsTable({
                       >
                         <EditIcon />
                       </IconButton>
-
-                      {/* <IconButton aria-label="filter list" onClick={e => removeTransaction(id)}>
-                        <DeleteForeverIcon />
-                      </IconButton> */}
                     </TableCell>
                   </TableRow>
                 );
               })}
           </TableBody>
-          <TableFooter className={classes.footer}>
-            <TableRow>
-              <TableCell colSpan={6}>
-                Сюда можно вставить какую-нибудь инфу, только не ясно чо шрифт
-                такой маленький
-              </TableCell>
-            </TableRow>
-          </TableFooter>
         </Table>
       </Paper>
     </>

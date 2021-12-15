@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Tabs, Tab, Button } from '@material-ui/core';
+import { UserDataContext } from './UserDataContext';
 
 import { addNewTag, email } from '../data/firebase';
 
@@ -52,7 +53,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function UserSettings({ open, onClose, tags }) {
+export function UserSettings({ open, onClose }) {
+  const userData = useContext(UserDataContext);
+  const tags = userData.tags
   const classes = useStyles();
   const [tab, setTab] = useState(0);
   const [editableTag, setEditableTag] = useState('');

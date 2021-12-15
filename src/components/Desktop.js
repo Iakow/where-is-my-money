@@ -2,12 +2,12 @@ import { Header } from "./Header";
 import { Container } from "@material-ui/core";
 import { Stats } from "./Stats/Stats";
 
-export function Desktop({userData, openTransactionForm}) {
+export function Desktop({ openTransactionForm }) {
   return (
     <>
-      <Header userData={userData} openTransactionForm={openTransactionForm} />
+      <Header openTransactionForm={openTransactionForm} />
       <Container maxWidth="lg">
-        <Stats userData={userData} openTransactionForm={openTransactionForm} />
+        <Stats openTransactionForm={openTransactionForm} />
       </Container>
     </>
   );

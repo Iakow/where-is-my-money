@@ -1,4 +1,4 @@
-import React, { useState, createContext } from "react";
+import React, { useState } from "react";
 import { UserDataContext } from "./UserDataContext";
 import { useFirebase } from "../data/firebase";
 
@@ -55,7 +55,6 @@ export function App() {
 
   const { isResponseWaiting, userData, isAuth } = useFirebase();
 
-
   //////////////////////////////////////////////////////////////////
   const [transactionForm, setTransactionForm] = useState({
     isOpen: false,
@@ -94,21 +93,14 @@ export function App() {
           <CssBaseline />
 
           {isXS ? (
-            <Mobile
-              userData={userData}
-              openTransactionForm={openTransactionForm}
-            />
+            <Mobile openTransactionForm={openTransactionForm} />
           ) : (
-            <Desktop
-              userData={userData}
-              openTransactionForm={openTransactionForm}
-            />
+            <Desktop openTransactionForm={openTransactionForm} />
           )}
 
           <TransactionForm
             isOpen={transactionForm.isOpen}
             onClose={closeForm}
-            userData={userData}
             currentTransactionID={transactionForm.transactionID}
           />
         </div>
