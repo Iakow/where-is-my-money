@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useContext } from "react";
-import { UserDataContext } from "../UserDataContext";
+import { UserDataContext } from "../../contexts/UserDataContext";
 import { Link } from "react-router-dom";
 import { Diagram } from "./Diargam";
 import StatsTable from "./StatsTable";
@@ -10,9 +10,10 @@ import TableChartIcon from "@material-ui/icons/TableChart";
 import PieChartIcon from "@material-ui/icons/PieChart";
 import { Tabs, Tab } from "@material-ui/core";
 import ReplyIcon from "@material-ui/icons/Reply";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Paper } from "@material-ui/core";
 import { ButtonBase } from "@material-ui/core";
-import { UserDataContext } from "../UserDataContext";
+import { UserDataContext } from "../../contexts/UserDataContext";
 
 const useStyles = makeStyles((theme) => ({
   main: {
@@ -27,6 +28,8 @@ const useStyles = makeStyles((theme) => ({
   header: {
     display: "flex",
     height: 50,
+    backgroundColor: "#1b1b1b",
+    position: "relative",
   },
   paper: {
     height: "100%",
@@ -43,10 +46,15 @@ const useStyles = makeStyles((theme) => ({
     width: "150px",
   },
   navBtn: {
+    position: "absolute",
+    height: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    width: 100,
+    width: 50,
+  },
+  tabs: {
+    backgroundColor: "#1b1b1b",
   },
 }));
 
@@ -114,7 +122,7 @@ export function Stats({ openTransactionForm, type }) {
         <Paper className={classes.paper}>
           <header className={classes.header}>
             <Link className={classes.navBtn} to="/">
-              <ReplyIcon color="action" />
+              <ArrowBackIcon color="action" />
             </Link>
             <StatsTimeFilter
               handler={handleFilterChange}
@@ -126,15 +134,18 @@ export function Stats({ openTransactionForm, type }) {
           {tabValue === 0 && (
             <StatsTable
               transactions={tableData}
-              userTags={userData.tags}
-              categories={userData.categories}
               openTransactionForm={openTransactionForm}
             />
           )}
 
           {tabValue === 1 && <Diagram data={chartData} />}
 
-          <Tabs variant="fullWidth" value={tabValue} onChange={onTabChange}>
+          <Tabs
+            variant="fullWidth"
+            value={tabValue}
+            onChange={onTabChange}
+            className={classes.tabs}
+          >
             {/* <Tab icon={<ReplyIcon />} /> */}
             <Tab icon={<TableChartIcon />} />
             <Tab icon={<PieChartIcon />} />

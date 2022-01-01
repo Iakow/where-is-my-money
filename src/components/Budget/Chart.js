@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { UserDataContext } from "../UserDataContext";
+import { UserDataContext } from "../../contexts/UserDataContext";
 import { makeStyles } from "@material-ui/core";
 import {
   PieChart,

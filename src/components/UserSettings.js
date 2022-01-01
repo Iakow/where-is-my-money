@@ -1,52 +1,55 @@
-import React, { useState, useContext } from 'react';
-import { Tabs, Tab, Button } from '@material-ui/core';
-import { UserDataContext } from './UserDataContext';
+import React, { useState, useContext } from "react";
+import { Tabs, Tab, Button } from "@material-ui/core";
+import { UserDataContext } from "../contexts/UserDataContext";
 
-import { addNewTag, email } from '../data/firebase';
+import { addNewTag, email } from "../data/firebase";
 
-import { signout } from '../data/firebase';
-import { makeStyles } from '@material-ui/core';
-import LocalOfferIcon from '@material-ui/icons/LocalOffer';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import { IconButton } from '@material-ui/core';
-import { DeleteOutline } from '@material-ui/icons';
-import { TextField } from '@material-ui/core';
-import { Add } from '@material-ui/icons';
-import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-import { editTag, removeTag } from '../data/firebase';
-import { Dialog, DialogContent, DialogTitle } from '@material-ui/core';
+import { signout } from "../data/firebase";
+import { makeStyles, useMediaQuery, useTheme } from "@material-ui/core";
+import LocalOfferIcon from "@material-ui/icons/LocalOffer";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import { IconButton } from "@material-ui/core";
+import { DeleteOutline } from "@material-ui/icons";
+import { TextField } from "@material-ui/core";
+import { Add } from "@material-ui/icons";
+import AccountCircleIcon from "@material-ui/icons/AccountCircle";
+import { editTag, removeTag } from "../data/firebase";
+import { Dialog, DialogContent, DialogTitle } from "@material-ui/core";
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   content: {
-    display: 'flex',
-    flexDirection: 'row',
+    display: "flex",
+    flexDirection: "row",
     minWidth: 500,
     minHeight: 400,
     padding: 0,
+    [theme.breakpoints.down("xs")]: {
+      minWidth: "80vw",
+    },
   },
   title: {
-    padding: '8px 54px',
-    display: 'flex',
-    justifyContent: 'center',
-    backgroundColor: '#c9c9c9',
+    padding: "8px 54px",
+    display: "flex",
+    justifyContent: "center",
+    backgroundColor: "#1f1f1f",
   },
 
   tabContent: {
-    padding: '8px 20px',
+    padding: "8px 20px",
   },
   tabs: {
-    backgroundColor: '#ededed',
+    backgroundColor: "#2d2d2d",
   },
   tab: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-start",
     gap: 5,
   },
   labelIcon: {
-    minHeight: 'initial',
+    minHeight: "initial",
   },
   listItem: {
     width: 200,
@@ -55,31 +58,33 @@ const useStyles = makeStyles(theme => ({
 
 export function UserSettings({ open, onClose }) {
   const userData = useContext(UserDataContext);
-  const tags = userData.tags
+  const theme = useTheme();
+  const isXS = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true });
+  const tags = userData.tags;
   const classes = useStyles();
   const [tab, setTab] = useState(0);
-  const [editableTag, setEditableTag] = useState('');
-  const [newTag, setNewTag] = useState('');
+  const [editableTag, setEditableTag] = useState("");
+  const [newTag, setNewTag] = useState("");
 
   const onTabChange = (e, value) => {
     setTab(value);
   };
 
-  const onTagFocus = e => {
+  const onTagFocus = (e) => {
     setEditableTag(e.target.value);
   };
 
   const onTagBlur = ({ target }) => {
-    setEditableTag('');
+    setEditableTag("");
 
     if (target.value === editableTag) return;
 
-    const id = target.id.split('tag-')[1];
+    const id = target.id.split("tag-")[1];
     editTag(id, target.value);
   };
 
   const onTagDelete = ({ currentTarget }) => {
-    const id = currentTarget.id.split('tag-delete-')[1];
+    const id = currentTarget.id.split("tag-delete-")[1];
     removeTag(id);
   };
 
@@ -89,7 +94,7 @@ export function UserSettings({ open, onClose }) {
 
   const onAddNewTag = () => {
     addNewTag(newTag);
-    setNewTag('');
+    setNewTag("");
   };
 
   const tagsList = (
@@ -106,7 +111,11 @@ export function UserSettings({ open, onClose }) {
             />
 
             <ListItemSecondaryAction>
-              <IconButton id={`tag-delete-${id}`} onClick={onTagDelete} edge="end">
+              <IconButton
+                id={`tag-delete-${id}`}
+                onClick={onTagDelete}
+                edge="end"
+              >
                 <DeleteOutline />
               </IconButton>
             </ListItemSecondaryAction>
@@ -114,7 +123,11 @@ export function UserSettings({ open, onClose }) {
         ))}
 
       <ListItem className={classes.listItem}>
-        <TextField onFocus={onTagFocus} value={newTag} onChange={onInputNewTag} />
+        <TextField
+          onFocus={onTagFocus}
+          value={newTag}
+          onChange={onInputNewTag}
+        />
         <ListItemSecondaryAction>
           <IconButton edge="end" aria-label="delete" onClick={onAddNewTag}>
             <Add />
@@ -137,19 +150,19 @@ export function UserSettings({ open, onClose }) {
           onChange={onTabChange}
           TabIndicatorProps={{
             style: {
-              display: 'none',
+              display: "none",
             },
           }}
         >
           <Tab
             classes={{ wrapper: classes.tab, labelIcon: classes.labelIcon }}
             icon={<AccountCircleIcon />}
-            label="My account"
+            label={!isXS && "My account"}
           />
           <Tab
             classes={{ wrapper: classes.tab, labelIcon: classes.labelIcon }}
             icon={<LocalOfferIcon />}
-            label="My tags"
+            label={!isXS && "My tags"}
           />
         </Tabs>
 

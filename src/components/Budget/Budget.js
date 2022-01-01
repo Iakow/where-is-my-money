@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { UserDataContext } from "../UserDataContext";
+import { UserDataContext } from "../../contexts/UserDataContext";
 import IconButton from "@material-ui/core/IconButton";
 import AlarmAddIcon from "@material-ui/icons/AlarmAdd";
 import SettingsIcon from "@material-ui/icons/Settings";

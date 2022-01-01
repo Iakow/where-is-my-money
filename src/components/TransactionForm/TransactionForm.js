@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { UserDataContext } from "../UserDataContext";
+import { UserDataContext } from "../../contexts/UserDataContext";
 import AmountInput from "./AmountInput";
 import DateInput from "./DateInput";
 import TagsInput from "./TagsInput";

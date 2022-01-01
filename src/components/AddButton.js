@@ -2,7 +2,7 @@ import { makeStyles, Fab } from "@material-ui/core";
 import AddIcon from "@material-ui/icons/Add";
 import { useState, useContext } from "react";
 import { TransactionForm } from "./TransactionForm/TransactionForm";
-import { UserDataContext } from "./UserDataContext";
+import { UserDataContext } from "../contexts/UserDataContext";
 
 
 const useStyles = makeStyles((theme) => ({

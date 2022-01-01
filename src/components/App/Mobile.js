@@ -1,8 +1,8 @@
 import { Routes, Route, Link } from "react-router-dom";
 
-import { Budget } from "./Budget/Budget";
-import { Stats } from "./Stats/Stats";
-import { AddButton } from "./AddButton";
+import { Budget } from "../Budget/Budget";
+import { Stats } from "../Stats/Stats";
+import { AddButton } from "../AddButton";
 
 import { makeStyles } from "@material-ui/core";
 import BarChartIcon from "@material-ui/icons/BarChart";

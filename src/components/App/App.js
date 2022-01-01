@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { UserDataContext } from "./UserDataContext";
-import { useFirebase } from "../data/firebase";
+import { UserDataContext } from "../../contexts/UserDataContext";
+import { useFirebase } from "../../data/firebase";
 
 import {
   makeStyles,
@@ -15,9 +15,9 @@ import {
   useMediaQuery,
 } from "@material-ui/core";
 
-import { Auth } from "./Auth";
-import { TransactionForm } from "./TransactionForm/TransactionForm";
-import { SetBalanceForm } from "./SetBalanceForm";
+import { Auth } from "../Auth";
+import { TransactionForm } from "../TransactionForm/TransactionForm";
+import { SetBalanceForm } from "../SetBalanceForm";
 import { Desktop } from "./Desktop";
 import { Mobile } from "./Mobile";
 

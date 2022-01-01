@@ -1,6 +1,6 @@
-import { Header } from "./Header";
+import { Header } from "../Header";
 import { Container } from "@material-ui/core";
-import { Stats } from "./Stats/Stats";
+import { Stats } from "../Stats/Stats";
 
 export function Desktop({ openTransactionForm }) {
   return (
