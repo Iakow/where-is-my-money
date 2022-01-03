@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
   stickyButton: {
     position: "absolute",
     bottom: 44,
-    right: 24,
+    right: 36,
     zIndex: 1299,
   },
   statsBtn: {

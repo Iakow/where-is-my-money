@@ -1,27 +1,22 @@
-import React from 'react';
+import {
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+} from "@material-ui/core";
 
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import styles from '../../style.css';
-import { getHTMLDate } from '../../utils';
-
-export default function Filters({ value, upFilterState }) {
-  const handleSelectFilter = ({ target }) => {
-    upFilterState(target.name, +target.value);
-  };
-
+export default function Filters({ value, handleFilter }) {
   return (
     <FormControl component="fieldset">
       <FormLabel component="legend">Filter by money way</FormLabel>
       <RadioGroup
         row
-        aria-label="gender"
         name="filterMoneyway"
         value={value.filterMoneyway}
-        onChange={handleSelectFilter}
+        onChange={({ target }) => {
+          handleFilter({ [target.name]: +target.value });
+        }}
       >
         <FormControlLabel
           value="0"

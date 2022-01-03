@@ -2,8 +2,8 @@ import React, { useEffect, useState, useMemo, useContext } from "react";
 import { UserDataContext } from "../../contexts/UserDataContext";
 import { Link } from "react-router-dom";
 import { Diagram } from "./Diargam";
-import StatsTable from "./StatsTable";
-import StatsTimeFilter from "./StatsTImeFilter";
+import {StatsTable} from "./StatsTable/StatsTable";
+import {StatsTimeFilter} from "./StatsTImeFilter";
 
 import { makeStyles } from "@material-ui/core/styles";
 import TableChartIcon from "@material-ui/icons/TableChart";

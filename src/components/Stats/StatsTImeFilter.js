@@ -33,7 +33,7 @@ const useStyles = makeStyles({
   },
 });
 
-const TimeFilter = ({ handler, filterValue, budgetValue }) => {
+export function StatsTimeFilter({ handler, filterValue, budgetValue }) {
   console.log(budgetValue);
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -147,6 +147,4 @@ const TimeFilter = ({ handler, filterValue, budgetValue }) => {
       </Popover>
     </div>
   );
-};
-
-export default TimeFilter;
+}
