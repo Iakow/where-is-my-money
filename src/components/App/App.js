@@ -34,10 +34,8 @@ const useStyles = makeStyles((theme) => {
       [theme.breakpoints.down("xs")]: {
         backgroundImage: "radial-gradient(transparent, black)",
         height: "100vh",
+        height: "calc(var(--vh, 1vh) * 100)",
       },
-    },
-    x: {
-      backgroundColor: "red",
     },
   };
 });
