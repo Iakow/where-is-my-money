@@ -1,29 +1,25 @@
 import React, { useState } from "react";
+import { AppBar, IconButton, makeStyles } from "@material-ui/core";
+import MenuIcon from "@material-ui/icons/Menu";
+
 import { Budget } from "./Budget/Budget.js";
 import { UserSettings } from "./UserSettings.js";
 
-import MenuIcon from "@material-ui/icons/Menu";
-import { AppBar, IconButton } from "@material-ui/core";
-import { makeStyles } from "@material-ui/core/styles";
-import { AddButton } from "./AddButton.js";
-
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   bar: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    height: 140,
-  },
-  addButton: {
-    position: "relative",
-    top: 60,
+    justifyContent: "center",
+    height: 120,
   },
   settingsButton: {
     color: "white",
+    position: "absolute",
+    left: 0,
   },
 }));
 
-export function Header({  openTransactionForm }) {
+export function Header() {
   const classes = useStyles();
   const [settingsIsOpen, setSettingsIsOpen] = useState(false);
 
@@ -43,17 +39,9 @@ export function Header({  openTransactionForm }) {
         </IconButton>
 
         <Budget type="desktop" />
-
-        <AddButton
-          className={classes.addButton}
-          handler={openTransactionForm}
-        />
       </AppBar>
 
-      <UserSettings
-        open={settingsIsOpen}
-        onClose={closeSettings}
-      />
+      <UserSettings open={settingsIsOpen} onClose={closeSettings} />
     </>
   );
 }
