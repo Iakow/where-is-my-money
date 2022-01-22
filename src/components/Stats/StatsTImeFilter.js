@@ -34,7 +34,6 @@ const useStyles = makeStyles({
 });
 
 export function StatsTimeFilter({ handler, filterValue, budgetValue }) {
-  console.log(budgetValue);
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
   const [value, setValue] = useState("All time");

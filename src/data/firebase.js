@@ -3,11 +3,13 @@ import "firebase/auth";
 import "firebase/firestore";
 import { useState, useEffect } from "react";
 
-const firebaseConfig = {
+import { firebaseConfig } from "./config";
+
+/* const firebaseConfig = {
   apiKey: process.env.apiKey,
   authDomain: process.env.authDomain,
   projectId: process.env.projectId,
-};
+}; */
 
 let userDBRef;
 export let email;
@@ -25,41 +27,9 @@ function setupFirebase() {
   }
 }
 
-function watchUserData(handleData) {
-  /* тут транзакции отдельно, юзердок отдельно. Как совместить? */
-
-  userDBRef.onSnapshot((userData) => {
-    if (userData.data()) {
-      console.log(userData.data());
-      handleData({ ...userData.data() });
-    }
-  });
-
-  userDBRef.collection("transactions").onSnapshot((transactionsSnapshot) => {
-    const transactions = {};
-    let balance = null;
-
-    transactionsSnapshot.forEach((transaction) => {
-      // а нельзя без перебора?
-      if (transaction.id !== "balance") {
-        transactions[transaction.id] = transaction.data();
-      } else {
-        balance = transaction.data().value;
-      }
-    });
-
-    if (balance !== null) {
-      // если после срабатывания второго листнера баланса нету - новый юзер. Но его еще можно просто прочесть.
-      handleData({ balance, transactions });
-    } else {
-      handleData(null); // ????????????????????????????????????
-    }
-  });
-}
-
 const emptyUserData = {
   transactions: {},
-  /* balance: null, */
+  balance: null,
   tags: [],
   categories: {
     income: [],
@@ -74,28 +44,49 @@ export function useFirebase() {
   const [userData, setUserData] = useState(emptyUserData);
   const [isAuth, setIsAuth] = useState(false);
 
+  function watchUserData(handleData) {
+    /* тут транзакции отдельно, юзердок отдельно. Как совместить? */
+
+    userDBRef.onSnapshot((userData) => {
+      if (userData.data()) {
+        handleData({ ...userData.data() });
+      }
+    });
+
+    userDBRef.collection("transactions").onSnapshot((transactionsSnapshot) => {
+      const transactions = {};
+      let balance = null;
+
+      transactionsSnapshot.forEach((transaction) => {
+        // а нельзя без перебора?
+        if (transaction.id !== "balance") {
+          transactions[transaction.id] = transaction.data();
+        } else {
+          balance = transaction.data().value;
+        }
+      });
+
+      if (balance !== null) {
+        // если после срабатывания второго листнера баланса нету - новый юзер. Но его еще можно просто прочесть.
+        handleData({ balance, transactions });
+      } else {
+        handleData(null); //??????????
+        setIsResponceWaiting(false);
+      }
+    });
+  }
+
   function onUserDataChanges(data) {
     // TODO новый юзер - no data
 
     if (data) {
-      console.log("%c   setUserData()", "background: #222; color: #bada55");
+      setUserData((userData) => ({ ...userData, ...data }));
 
-      setUserData((userData) => {
-        return { ...userData, ...data };
-      });
-
-      console.log("%c   setIsAuth()", "background: #222; color: #bada55");
-
-      setIsAuth(true);
-
-      console.log(
-        "%c   setIsResponceWaiting()",
-        "background: #222; color: #bada55"
-      );
-
+      if (data.balance) setIsAuth(true);
       if (data.transactions) setIsResponceWaiting(false);
     } else {
       console.log("NO-DATA");
+      setIsAuth(true);
       // создать док, потом задать баланс
       initializeUserDB();
     }
@@ -108,14 +99,12 @@ export function useFirebase() {
   }
 
   useEffect(() => {
-    console.log("FB-useEffect");
     setupFirebase();
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         email = user.email;
         userDBRef = firebase.firestore().collection("users").doc(user.uid);
-
         // 1. Получаем юзердок
         // 2. Если его не существует - вот здесь и нужно задавать баланс и сразу инициализировать все остальное❗️❗️❗️
         // 3. По итогам - навешивать листнеры.
@@ -152,11 +141,7 @@ export function initializeUserDB() {
       ],
       income: ["Зарплата", "Фриланс", "Подарок", "Другое"],
     },
-    tags: {
-      income: [],
-      outcome: [],
-    },
-    initialized: false,
+    tags: {},
   };
 
   Promise.all([userDBRef.set({ ...settings }), setBalance(null)]).catch(

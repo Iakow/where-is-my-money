@@ -2,23 +2,21 @@ import React, { useEffect, useState, useMemo, useContext } from "react";
 import { UserDataContext } from "../../contexts/UserDataContext";
 import { Link } from "react-router-dom";
 import { Diagram } from "./Diargam";
-import {StatsTable} from "./StatsTable/StatsTable";
-import {StatsTimeFilter} from "./StatsTImeFilter";
+import { StatsTable } from "./StatsTable/StatsTable";
+import { StatsTimeFilter } from "./StatsTImeFilter";
 
 import { makeStyles } from "@material-ui/core/styles";
 import TableChartIcon from "@material-ui/icons/TableChart";
 import PieChartIcon from "@material-ui/icons/PieChart";
 import { Tabs, Tab } from "@material-ui/core";
-import ReplyIcon from "@material-ui/icons/Reply";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { Paper } from "@material-ui/core";
-import { ButtonBase } from "@material-ui/core";
 import { UserDataContext } from "../../contexts/UserDataContext";
 
 const useStyles = makeStyles((theme) => ({
   main: {
     padding: "10px 0",
-    height: "calc(100vh - 140px)",
+    height: "calc(100vh - 120px)",
     [theme.breakpoints.down("xs")]: {
       padding: 0,
       height: "100%",
@@ -56,12 +54,19 @@ const useStyles = makeStyles((theme) => ({
   tabs: {
     backgroundColor: "#1b1b1b",
   },
+  message: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "80%",
+  }
 }));
 
 export function Stats({ openTransactionForm, type }) {
   const userData = useContext(UserDataContext);
   const classes = useStyles();
   const [tabValue, setTabValue] = useState(0);
+  const transactionsExist = Boolean(Object.keys(userData.transactions).length);
 
   const [filters, setFilters] = useState({ startDate: null, lastDate: null });
 
@@ -124,32 +129,38 @@ export function Stats({ openTransactionForm, type }) {
             <Link className={classes.navBtn} to="/">
               <ArrowBackIcon color="action" />
             </Link>
-            <StatsTimeFilter
-              handler={handleFilterChange}
-              filterValue={filters}
-              budgetValue={userData.budget}
-            />
+
+            {transactionsExist && (
+              <StatsTimeFilter
+                handler={handleFilterChange}
+                filterValue={filters}
+                budgetValue={userData.budget}
+              />
+            )}
           </header>
 
-          {tabValue === 0 && (
+          {tabValue === 0 && transactionsExist && (
             <StatsTable
               transactions={tableData}
               openTransactionForm={openTransactionForm}
             />
           )}
 
-          {tabValue === 1 && <Diagram data={chartData} />}
+          {tabValue === 1 && transactionsExist && <Diagram data={chartData} />}
 
-          <Tabs
-            variant="fullWidth"
-            value={tabValue}
-            onChange={onTabChange}
-            className={classes.tabs}
-          >
-            {/* <Tab icon={<ReplyIcon />} /> */}
-            <Tab icon={<TableChartIcon />} />
-            <Tab icon={<PieChartIcon />} />
-          </Tabs>
+          {transactionsExist && (
+            <Tabs
+              variant="fullWidth"
+              value={tabValue}
+              onChange={onTabChange}
+              className={classes.tabs}
+            >
+              <Tab icon={<TableChartIcon />} />
+              <Tab icon={<PieChartIcon />} />
+            </Tabs>
+          )}
+
+          {!transactionsExist && <p className={classes.message}>You haven't added any transactions yet</p>}
         </Paper>
       </main>
     );

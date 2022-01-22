@@ -46,7 +46,7 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID }) {
     date: Date.now(),
     sum: 0,
     category: "",
-    tags: [], // как-то тупо. Почему не null?
+    tags: [],
     comment: "",
   };
 
@@ -71,6 +71,8 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID }) {
     if (currentTransactionID) {
       setData({ ...transaction });
       setIsIncome(transaction.sum > 0 ? true : false);
+    } else {
+      setData(initialFormValue);
     }
   }, [isOpen]);
 
@@ -99,7 +101,6 @@ export function TransactionForm({ isOpen, onClose, currentTransactionID }) {
 
   const cancel = () => {
     setData(initialFormValue); //TODO: тогда зачем мне это при открытии делать
-    // и вообще, какое должно быть состояние у формы когда она закрыта? Что значит очисить форму?
     setIsIncome(false);
     setError({ sum: false, category: false });
     onClose();

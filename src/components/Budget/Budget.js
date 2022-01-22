@@ -118,9 +118,13 @@ export function Budget({ type }) {
       </div>
 
       <div className={classes.visualization}>
-        <div className={budget ? classes[type] : null}>
-          <Chart type={type} />
-        </div>
+        {/* если не мобила и нет бюджета */}
+
+        {!(!budget && type === "desktop") && (
+          <div className={classes[type]}>
+            <Chart type={type} />
+          </div>
+        )}
 
         <IconButton className={classes.budgetBtn} onClick={openForm}>
           {budget ? <SettingsIcon /> : <AlarmAddIcon />}

@@ -31,10 +31,10 @@ const useStyles = makeStyles((theme) => {
     },
     app: {
       // без этого слетает листнер на ресайз !!!
+      height: "100vh",
       [theme.breakpoints.down("xs")]: {
         backgroundImage: "radial-gradient(transparent, black)",
-        height: "100vh",
-        height: "calc(var(--vh, 1vh) * 100)",
+        /* height: "calc(var(--vh, 1vh) * 100)", */
       },
     },
   };
@@ -52,7 +52,7 @@ export function App() {
   const isXS = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true });
 
   const { isResponseWaiting, userData, isAuth } = useFirebase();
-
+console.log(userData)
   //////////////////////////////////////////////////////////////////
   const [transactionForm, setTransactionForm] = useState({
     isOpen: false,
@@ -77,11 +77,21 @@ export function App() {
   }
 
   if (isAuth === false) {
-    return <Auth />;
+    return (
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
+        <Auth />
+      </ThemeProvider>
+    );
   }
 
-  if (userData.transactions.balance === null) {
-    return <SetBalanceForm />;
+  if (userData.balance === null) {
+    return (
+      <ThemeProvider theme={darkTheme}>
+          <CssBaseline />
+          <SetBalanceForm />
+      </ThemeProvider>
+    );
   }
 
   return (

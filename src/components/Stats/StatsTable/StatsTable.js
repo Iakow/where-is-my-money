@@ -15,7 +15,7 @@ const useStyles = makeStyles(() => ({
 
 export function StatsTable({ transactions, openTransactionForm }) {
   const classes = useStyles();
-
+  
   const [filters, setFilters] = useState({
     filterMoneyway: 0,
   });
@@ -55,8 +55,8 @@ export function StatsTable({ transactions, openTransactionForm }) {
   };
 
   return (
-    <Paper className={classes.statsTable}>
-      <Table stickyHeader size="small">
+    <div className={classes.statsTable}>
+      <Table stickyHeader size="small" >
         <TableHeader
           sortBy={sorting.name}
           sortOrder={sorting.order}
@@ -75,6 +75,6 @@ export function StatsTable({ transactions, openTransactionForm }) {
           ))}
         </TableBody>
       </Table>
-    </Paper>
+    </div>
   );
 }

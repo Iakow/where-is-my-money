@@ -18,26 +18,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const colors = ["#cdcdcdde", "#00C49F", "#cdcdcdde", "#FF8042"];
+const colors = ["#a3a3a3", "#00C49F", "#6d5d51", "#FF8042"];
 
 const Chart = ({ type }) => {
   const { balance, budget, transactions } = useContext(UserDataContext);
   const classes = useStyles();
 
-  // это нужно только если бюджет задается задним числом
-
   function calculateData() {
-    const moneySpent = Math.abs(
-      Object.values(transactions)
-        .filter(
-          // лишнее, надо все в редюс
-          (transaction) =>
-            transaction.date < budget.lastDate &&
-            transaction.date > budget.firstDate &&
-            transaction.sum < 0 // TODO: здесь не учитываются доходы? Ну и по идее после каждого дохода логично перерасчитывать бюджет.
-        )
-        .reduce((moneySpent, transaction) => moneySpent + transaction.sum, 0)
-    );
+    let moneySpent = 0;
+    Object.values(transactions)
+      .filter(({ date }) => date < budget.lastDate && date > budget.firstDate)
+      .forEach(({ sum }) => {
+        if (sum < 0) moneySpent += Math.abs(sum);
+      });
+
     const moneyLeft = balance;
     const timeLeft = budget.lastDate - Date.now();
     const timeSpent = Date.now() - budget.firstDate;
@@ -63,9 +57,9 @@ const Chart = ({ type }) => {
 
       const ratio = moneyLeftPercentage / timeLeftPercentage;
 
-      if (ratio >= 1) {
+      if (ratio >= 0.8) {
         return green;
-      } else if (ratio < 1 && ratio > 0.9) {
+      } else if (ratio < 1.8 && ratio > 0.5) {
         return yellow;
       } else {
         return red;
@@ -113,14 +107,13 @@ const Chart = ({ type }) => {
             endAngle={90 - 360}
           >
             <Cell
-              /* fill={colors[0]} */ stroke={color}
+              stroke={color}
               fill={"transparent"}
               strokeWidth={0.3}
             />
             <Cell
               className={classes.money}
               fill={color}
-              /* fill={"#40D1FF"} */
               stroke="false"
             />
           </Pie>
@@ -173,7 +166,7 @@ const Chart = ({ type }) => {
           />
           <Bar
             dataKey="timeLeftPercentage"
-            fill={colors[1]}
+            fill={colors[0]}
             barSize={5}
             background={{ fill: "black", fillOpacity: "0.2" }}
           />
